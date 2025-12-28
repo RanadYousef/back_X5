@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BorrowRequest extends Model
+class BorrowingRequest extends Model
 {
-    protected $fillable=['user_id',
-    'book_id',
+    protected $fillable=[
+        'user_id',
+        'book_id',
     
-];
+ ];
 public function book(){
     return $this->belongsTo(Book::class);
 }
