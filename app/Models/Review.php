@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 // Define the review model
-class review extends Model
+class Review extends Model
 {
     use Hasfactory,softdeletes;
     // Define fillable attributes
@@ -15,12 +15,12 @@ class review extends Model
         'rating',
         'status',
         'comment',
-        
+
     ];
     // Enable soft deletes
     use softdeletes;
     // Define relationships
-    
+
     public function user()
     {
         return $this->belongsTo(User::class);
