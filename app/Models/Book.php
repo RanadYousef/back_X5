@@ -20,10 +20,10 @@ public function category(){
     return $this->belongsTo(Category::class);
   }
   public function borrowRequests(){
-     return $this->hasMany(BorrowRequest::class);
+     return $this->hasMany(BorrowingRequest::class);
   }
   public function borrows(){
-    return $this->hasMany(Borrow::class);
+    return $this->hasMany(Borrowing::class);
   }
 
    public function reviews(){
