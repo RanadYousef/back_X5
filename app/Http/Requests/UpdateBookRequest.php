@@ -19,7 +19,7 @@ class UpdateBookRequest extends FormRequest
         return [
             'title'       => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'quantity'    => 'required|integer|min:0',
+            'copies_number'    => 'required|integer|min:0',
         ];
     }
 }

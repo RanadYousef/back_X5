@@ -38,7 +38,7 @@ class BorrowingController extends Controller
             $book = Book::findOrFail($request->book_id);
 
             // التحقق من توفر نسخ
-            if ($book->quantity < 1) {
+            if ($book->copies_number < 1) {
                 return back()->with('error', 'الكتاب غير متوفر');
             }
 
@@ -50,7 +50,7 @@ class BorrowingController extends Controller
             ]);
 
             // إنقاص عدد النسخ
-            $book->decrement('quantity');
+            $book->decrement('copies_number');
 
             return redirect()->route('borrowings.index')
                 ->with('success', 'تمت استعارة الكتاب بنجاح');
@@ -70,7 +70,7 @@ class BorrowingController extends Controller
             }
 
             $borrowing->update(['status' => 'returned']);
-            $borrowing->book->increment('quantity');
+            $borrowing->book->increment('copies_number');
 
             return redirect()->route('borrowings.index')
                 ->with('success', 'تم إرجاع الكتاب بنجاح');

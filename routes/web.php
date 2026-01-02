@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BorrowingController;
 
-Route::middleware(['auth', 'role:admin|staff'])->group(function () {
+Route::middleware(['auth', 'role:admin|employee'])->group(function () {
 
     // مسارات إدارة الكتب
     Route::resource('books', BookController::class);

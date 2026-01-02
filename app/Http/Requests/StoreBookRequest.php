@@ -26,7 +26,7 @@ class StoreBookRequest extends FormRequest
         return [
             'title'       => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'quantity'    => 'required|integer|min:1',
+            'copies_number'    => 'required|integer|min:1',
         ];
     }
 }
