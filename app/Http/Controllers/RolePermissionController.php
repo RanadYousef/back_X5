@@ -18,16 +18,16 @@ class RolePermissionController extends Controller
         $roles = Role::with('permissions:id,name')->get();
         return view('admin.roles.index', compact('roles'));
     }
-
+    /////////////////////////////////////////////////////////////////
 
     public function create()
     {   $permissions = Permission::all();
         return view('admin.roles.create',compact('permissions'));
     }
+    /////////////////////////////////////////////////////////////////
 
    public function store(StoreRoleRequest $request) 
-{
-    // البيانات هنا تم التحقق منها تلقائياً بفضل الـ Form Request
+   {
         // تبدأ العملية (Transaction)
 
     DB::beginTransaction();
@@ -50,7 +50,9 @@ class RolePermissionController extends Controller
             Log::error("Store Role Error: " . $e->getMessage());
             return redirect()->back()->withInput()->with('error', 'حدث خطأ أثناء الحفظ');
         }
-}
+    }
+//////////////////////////////////////////////////////////////
+
 public function edit(Role $role)
 {
     // جلب كل الصلاحيات المتاحة في النظام
@@ -62,6 +64,7 @@ public function edit(Role $role)
     return view('admin.roles.edit', compact('role', 'permissions', 'rolePermissions'));
 }
 
+/////////////////////////////////////////////////////////////////
 
 public function update(UpdateRoleRequest $request, Role $role)
 {
@@ -89,10 +92,13 @@ public function update(UpdateRoleRequest $request, Role $role)
             return redirect()->back()->withInput()->with('error', 'حدث خطأ أثناء التحديث');
         }
 }
+//////////////////////////////////////////////////////////////////////
 public function show(Role $role)
 {
     return redirect()->route('roles.index');
 }
+
+//////////////////////////////////////////////////////////////////////
 public function destroy(Role $role)
 {
     try {
@@ -104,6 +110,7 @@ public function destroy(Role $role)
         $role->delete();
         return redirect()->route('roles.index')->with('success', 'تم حذف الدور بنجاح');
     } catch (Exception $e) {
+        Log::error("Delete Role Error: " . $e->getMessage());
         return redirect()->back()->with('error', 'فشل الحذف: ' . $e->getMessage());
     }
 }
