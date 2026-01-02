@@ -3,89 +3,98 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 
 class UserManagementController extends Controller
 {
     /**
-     * عرض جميع المستخدمين مع أدوارهم
+     * عرض جميع المستخدمين
      */
     public function index()
     {
-        return User::with('roles')->get();
+        try {
+            $users = User::with('roles')->get();
+            return view('users.index', compact('users'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'حدث خطأ أثناء تحميل المستخدمين');
+        }
     }
 
     /**
-     * إنشاء مستخدم جديد (موظف أو مشترك)
+     * عرض صفحة إنشاء مستخدم
      */
-    public function store(Request $request)
+    public function create()
     {
-        //  Validation 
-        $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
-            'role'     => 'required|exists:roles,name',
-        ]);
-
         try {
-            //  إنشاء المستخدم
+            $roles = Role::all();
+            return view('users.create', compact('roles'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'حدث خطأ أثناء تحميل الصفحة');
+        }
+    }
+
+    /**
+     * حفظ مستخدم جديد
+     */
+    public function store(StoreUserRequest $request)
+    {
+        try {
             $user = User::create([
                 'name'     => $request->name,
                 'email'    => $request->email,
                 'password' => Hash::make($request->password),
             ]);
 
-            //  إسناد الدور
             $user->assignRole($request->role);
 
-            return response()->json([
-                'message' => 'User created successfully',
-                'user'    => $user
-            ], 201);
+            return redirect()
+                ->route('users.index')
+                ->with('success', 'تم إنشاء المستخدم بنجاح');
 
         } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'فشل إنشاء المستخدم');
+        }
+    }
 
-            return response()->json([
-                'message' => 'Failed to create user',
-                'error'   => $e->getMessage()
-            ], 500);
+    /**
+     * عرض صفحة تعديل مستخدم
+     */
+    public function edit(User $user)
+    {
+        try {
+            $roles = Role::all();
+            return view('users.edit', compact('user', 'roles'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'حدث خطأ أثناء تحميل البيانات');
         }
     }
 
     /**
      * تحديث بيانات مستخدم
      */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        // Validation
-        $request->validate([
-            'name'  => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $user->id,
-            'role'  => 'sometimes|exists:roles,name',
-        ]);
-
         try {
-            //  تحديث البيانات الأساسية
-            $user->update($request->only(['name', 'email']));
-
-            //  تحديث الدور إن وُجد
-            if ($request->has('role')) {
-                $user->syncRoles([$request->role]);
-            }
-
-            return response()->json([
-                'message' => 'User updated successfully',
+            $user->update([
+                'name'  => $request->name,
+                'email' => $request->email,
             ]);
 
-        } catch (\Exception $e) {
+            $user->syncRoles([$request->role]);
 
-            return response()->json([
-                'message' => 'Failed to update user',
-                'error'   => $e->getMessage()
-            ], 500);
+            return redirect()
+                ->route('users.index')
+                ->with('success', 'تم تحديث المستخدم بنجاح');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'فشل تحديث المستخدم');
         }
     }
 
@@ -97,16 +106,14 @@ class UserManagementController extends Controller
         try {
             $user->delete();
 
-            return response()->json([
-                'message' => 'User deleted successfully',
-            ]);
+            return redirect()
+                ->route('users.index')
+                ->with('success', 'تم حذف المستخدم بنجاح');
 
         } catch (\Exception $e) {
-
-            return response()->json([
-                'message' => 'Failed to delete user',
-                'error'   => $e->getMessage()
-            ], 500);
+            return redirect()->back()
+                ->with('error', 'فشل حذف المستخدم');
         }
     }
 }
+
