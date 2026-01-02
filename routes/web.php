@@ -18,3 +18,9 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// Review routes api resource
+use App\Http\Controllers\ReviewController;
+
+Route::apiResource('reviews', ReviewController::class)
+    ->only(['index','show','store','update','destroy']);
