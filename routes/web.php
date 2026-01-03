@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserManagementController;
+
 use Illuminate\Http\Request;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\CategoryController;
@@ -61,5 +63,11 @@ Route::group(['middleware' => ['auth', 'role:admin|employee']], function () {
     Route::post('/reports/generate', [ReportController::class, 'generateReport'])->name('reports.generate');
 });
 });
+
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('users', UserManagementController::class);
+});
+
 
 require __DIR__.'/auth.php';
