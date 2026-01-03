@@ -21,7 +21,6 @@ class ReportController extends Controller
             ])
             ->with(['user','book'])
             ->get();
-
             return view('reports.show',compact('reports'));
             
         } catch (Exception $e) {
