@@ -13,6 +13,18 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BorrowingController;
 
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+}); 
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+
 Route::middleware(['auth', 'role:admin|employee'])->group(function () {
 
     // مسارات إدارة الكتب
@@ -32,8 +44,16 @@ Route::middleware(['auth', 'role:admin|employee'])->group(function () {
         ->name('borrowings.return');
 });
 
+Route::group(['middleware' => ['auth', 'role:admin|employee']], function () {
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::post('/reports/generate', [ReportController::class, 'generateReport'])->name('reports.generate');
+});
+
 Route::get('/', function () {
     return view('welcome');
+});
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('users', UserManagementController::class);
 });
 // RolePermission الراواتات الخاصة ب 
 // يديرها الادمن فقط
@@ -50,24 +70,11 @@ Route::get('categories', [CategoryController::class, 'index'])->name('categories
 Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-Route::group(['middleware' => ['auth', 'role:admin|employee']], function () {
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::post('/reports/generate', [ReportController::class, 'generateReport'])->name('reports.generate');
-});
-});
 
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::resource('users', UserManagementController::class);
-});
+
+
+
 
 
 require __DIR__.'/auth.php';
