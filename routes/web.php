@@ -7,6 +7,28 @@ use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\CategoryController;
 
 
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\BorrowingController;
+
+Route::middleware(['auth', 'role:admin|employee'])->group(function () {
+
+    // مسارات إدارة الكتب
+    Route::resource('books', BookController::class);
+
+    // عرض جميع عمليات الاستعارة
+    Route::get('borrowings', [BorrowingController::class, 'index'])
+        ->name('borrowings.index');
+   // عرض نموذج إنشاء عملية استعارة
+    Route::get('borrowings/create', [BorrowingController::class, 'create'])
+        ->name('borrowings.create');
+   // تنفيذ عملية استعارة كتاب
+    Route::post('borrowings', [BorrowingController::class, 'store'])
+        ->name('borrowings.store');
+    // إرجاع كتاب مستعار
+    Route::patch('borrowings/{borrowing}/return', [BorrowingController::class, 'returnBook'])
+        ->name('borrowings.return');
+});
+
 Route::get('/', function () {
     return view('welcome');
 });
