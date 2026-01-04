@@ -5,14 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Borrowing;
 use App\Models\Book;
 use App\Http\Requests\StoreBorrowingRequest;
+use Illuminate\Support\Facades\DB;
 
 /**
- * كنترولر إدارة الاستعارات
+ * Class BorrowingController
+ *
+ * Handles borrowing operations.
  */
 class BorrowingController extends Controller
 {
     /**
-     * عرض جميع عمليات الاستعارة
+     * Display a listing of borrowings.
      */
     public function index()
     {
@@ -21,7 +24,7 @@ class BorrowingController extends Controller
     }
 
     /**
-     * عرض نموذج الاستعارة
+     * Show the form for creating a new borrowing.
      */
     public function create()
     {
@@ -29,53 +32,60 @@ class BorrowingController extends Controller
     }
 
     /**
-     * تنفيذ عملية استعارة كتاب
+     * Store a newly created borrowing.
      */
     public function store(StoreBorrowingRequest $request)
     {
         try {
-            // جلب الكتاب
-            $book = Book::findOrFail($request->book_id);
+            DB::transaction(function () use ($request) {
 
-            // التحقق من توفر نسخ
-            if ($book->copies_number < 1) {
-                return back()->with('error', 'الكتاب غير متوفر');
-            }
+                $data = $request->validated();
 
-            // إنشاء سجل الاستعارة
-            Borrowing::create([
-                'book_id' => $book->id,
-                'user_id' => auth()->id(),
-                'status'  => 'borrowed',
-            ]);
+                $book = Book::lockForUpdate()->findOrFail($data['book_id']);
 
-            // إنقاص عدد النسخ
-            $book->decrement('copies_number');
+                if ($book->copies_number < 1) {
+                    throw new \Exception('Book not available');
+                }
+
+                Borrowing::create([
+                    'book_id' => $book->id,
+                    'user_id' => auth()->id(),
+                    'status'  => 'borrowed',
+                ]);
+
+                $book->decrement('copies_number');
+            });
 
             return redirect()->route('borrowings.index')
-                ->with('success', 'تمت استعارة الكتاب بنجاح');
+                ->with('success', 'Book borrowed successfully.');
+
         } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ أثناء الاستعارة');
+            return back()->with('error', 'Borrowing operation failed.');
         }
     }
 
     /**
-     * إرجاع كتاب مستعار
+     * Return a borrowed book.
      */
     public function returnBook(Borrowing $borrowing)
     {
         try {
-            if ($borrowing->status === 'returned') {
-                return back()->with('error', 'الكتاب مُعاد مسبقًا');
-            }
+            DB::transaction(function () use ($borrowing) {
 
-            $borrowing->update(['status' => 'returned']);
-            $borrowing->book->increment('copies_number');
+                if ($borrowing->status === 'returned') {
+                    throw new \Exception('Already returned');
+                }
+
+                $borrowing->update(['status' => 'returned']);
+
+                $borrowing->book->increment('copies_number');
+            });
 
             return redirect()->route('borrowings.index')
-                ->with('success', 'تم إرجاع الكتاب بنجاح');
+                ->with('success', 'Book returned successfully.');
+
         } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ أثناء إرجاع الكتاب');
+            return back()->with('error', 'Return operation failed.');
         }
     }
 }

@@ -5,14 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
+use Illuminate\Support\Facades\DB;
 
 /**
- * كنترولر إدارة الكتب
+ * Handles CRUD operations for books.
  */
 class BookController extends Controller
 {
     /**
-     * عرض جميع الكتب
+     * Display all books.
      */
     public function index()
     {
@@ -21,48 +22,53 @@ class BookController extends Controller
     }
 
     /**
-     * إضافة كتاب جديد
+     * Store a new book.
      */
     public function store(StoreBookRequest $request)
     {
         try {
-            
-            Book::create($request->validated());
+            DB::transaction(function () use ($request) {
+                Book::create($request->validated());
+            });
 
             return redirect()->route('books.index')
-                ->with('success', 'تمت إضافة الكتاب بنجاح');
+                ->with('success', 'Book created successfully.');
         } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ أثناء إضافة الكتاب');
+            return back()->with('error', 'Failed to create book.');
         }
     }
 
     /**
-     * تعديل كتاب
+     * Update a book.
      */
     public function update(UpdateBookRequest $request, Book $book)
     {
         try {
-            $book->update($request->validated());
+            DB::transaction(function () use ($request, $book) {
+                $book->update($request->validated());
+            });
 
             return redirect()->route('books.index')
-                ->with('success', 'تم تعديل الكتاب بنجاح');
+                ->with('success', 'Book updated successfully.');
         } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ أثناء تعديل الكتاب');
+            return back()->with('error', 'Failed to update book.');
         }
     }
 
     /**
-     * حذف كتاب
+     * Delete a book.
      */
     public function destroy(Book $book)
     {
         try {
-            $book->delete();
+            DB::transaction(function () use ($book) {
+                $book->delete();
+            });
 
             return redirect()->route('books.index')
-                ->with('success', 'تم حذف الكتاب بنجاح');
+                ->with('success', 'Book deleted successfully.');
         } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ أثناء حذف الكتاب');
+            return back()->with('error', 'Failed to delete book.');
         }
     }
 }
