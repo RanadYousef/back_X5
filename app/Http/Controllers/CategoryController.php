@@ -13,9 +13,9 @@ class CategoryController extends Controller
 {
     public function index()
 {
-    //  جلب المعرف والاسم فقط
+    // Fetch only the ID and Name
     $categories = Category::select('id', 'name')
-                          ->withCount('books') // جلب عدد الكتب فقط بدل جلب الكتب نفسها
+                          ->withCount('books') // Retrieve the total count of books only    
                           ->latest()
                           ->get();
                           
@@ -33,14 +33,14 @@ class CategoryController extends Controller
             Category::create($request->validated());
 
             return redirect()->route('categories.index')
-                             ->with('success', 'تم إضافة نوع الكتاب الجديد بنجاح');
+                             ->with('success', 'Book category added successfully');
 
         } catch (Exception $e) {
             Log::error("Category Store Error: " . $e->getMessage());
-          // اعادة المستخدم الى الصفحة التي جاء منها
+            //Redirect the user back to the previous page
             return redirect()->back()
-                             ->withInput()// اخذ البيانات التي ارسلها المستخدم و ارسالها معه الى الصفحة السابقة حتى لا يعيد كتابة كل شيء
-                             ->with('error', ' حدث خطأ أثناء الحفظ  يرجى اعادةالمحاولة لاحقاً');
+                             ->withInput()// Flash the input data back to the previous page to avoid re-typing
+                             ->with('error', 'an error occurred while saving. Please try again later.');
         }
     }
 
@@ -55,14 +55,14 @@ class CategoryController extends Controller
             $category->update($request->validated());
 
             return redirect()->route('categories.index')
-                             ->with('success', 'تم تحديث اسم التصنيف بنجاح');
+                             ->with('success', 'Category name updated successfully');
 
         } catch (Exception $e) {
             Log::error("Category Update Error: " . $e->getMessage());
 
             return redirect()->back()
                              ->withInput()
-                             ->with('error', 'فشل التحديث  قد يكون الاسم موجوداً مسبقاً');
+                             ->with('error', 'Update failed. This name might already exist');
         }
     }
     public function show(Category $category)
@@ -78,13 +78,13 @@ class CategoryController extends Controller
             $category->delete();
 
             return redirect()->route('categories.index')
-                             ->with('success', 'تم حذف التصنيف بنجاح');
+                             ->with('success', 'Category deleted successfully');
 
         } catch (Exception $e) {
             Log::error("Category Delete Error: " . $e->getMessage());
 
             return redirect()->back()
-                             ->with('error', 'عذراً لا يمكن حذف هذا التصنيف حالياً');
+                             ->with('error', ' this category cannot be deleted');
         }
     }
    

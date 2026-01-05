@@ -28,37 +28,35 @@ class RolePermissionController extends Controller
 
    public function store(StoreRoleRequest $request) 
    {
-        // تبدأ العملية (Transaction)
-
+       // transaction begins
     DB::beginTransaction();
     try {
         $validated = $request->validated();
-        //  إنشاء الدور
+        // creating role
         $role = Role::create(['name' => $validated['name']]);
-
-        //  ربط الصلاحيات
+        // permission
         if (!empty($validated['permissions'])) {
         $role->givePermissionTo($validated['permissions']);
         }
-        //  اعتماد التغييرات في القاعدة
+        // Commit the changes to the database if everything is successful
         DB::commit();
-        return redirect()->route('roles.index')->with('success', 'تم إضافة الدور وصلاحياته بنجاح');
+        return redirect()->route('roles.index')->with('success', 'Role and its permissions added successfully');
 
     }catch (Exception $e) {
-        // التراجع عن العملية
+        // Rollback the changes if an error occurs to maintain data integrity
             DB::rollBack();
             Log::error("Store Role Error: " . $e->getMessage());
-            return redirect()->back()->withInput()->with('error', 'حدث خطأ أثناء الحفظ');
+            return redirect()->back()->withInput()->with('error', 'An error occurred while saving.');
         }
     }
 //////////////////////////////////////////////////////////////
 
 public function edit(Role $role)
 {
-    // جلب كل الصلاحيات المتاحة في النظام
+    // Fetch all available permissions in the system
     $permissions = Permission::all();
 
-    // جلب أسماء الصلاحيات التي يمتلكها هذا الدور حالياً
+    // Retrieve the names of the permissions currently assigned to this role
     $rolePermissions = $role->permissions->pluck('id','name')->toArray();
 
     return view('admin.roles.edit', compact('role', 'permissions', 'rolePermissions'));
@@ -68,28 +66,26 @@ public function edit(Role $role)
 
 public function update(UpdateRoleRequest $request, Role $role)
 {
-    // تبدأ العملية (Transaction)
+    //   (Transaction)
     DB::beginTransaction();
 
     try {
         $validated = $request->validated();
-        //  تحديث اسم الدور
+        // update role's name
         $role->update(['name' => $validated['name']]);
-
-        //  مزامنة الصلاحيات (تحذف القديم وتضيف الجديد تلقائياً)
-        //  syncPermission:الأكثر أماناً في التحديث
+        // Sync permissions (automatically removes old ones and adds new ones)
+        //  syncPermission:The safest method for updating as it prevents duplication and maintains consistency
         $role->syncPermissions($validated['permissions'] ?? []);
 
-        //  اعتماد التغييرات في القاعدة
         DB::commit();
 
         return redirect()->route('roles.index')
-                         ->with('success', 'تم تحديث الدور وصلاحياته بنجاح');
+                         ->with('success', 'Update completed successfully.');
 
     } catch (Exception $e) {
             DB::rollBack();
             Log::error("Update Role Error: " . $e->getMessage());
-            return redirect()->back()->withInput()->with('error', 'حدث خطأ أثناء التحديث');
+            return redirect()->back()->withInput()->with('error', 'An error occurred during the update.');
         }
 }
 //////////////////////////////////////////////////////////////////////
@@ -102,16 +98,16 @@ public function show(Role $role)
 public function destroy(Role $role)
 {
     try {
-        // عدم السماح بحذف دور الادمن
+        // Prevent the deletion of the Admin role
         if (strtolower(trim($role->name)) === 'admin') {
-            return redirect()->back()->with('error', 'لا يمكن حذف دور المدير الأساسي');
+            return redirect()->back()->with('error', 'The Super Admin role cannot be deleted');
         }
 
         $role->delete();
-        return redirect()->route('roles.index')->with('success', 'تم حذف الدور بنجاح');
+        return redirect()->route('roles.index')->with('success', 'Role deleted successfully');
     } catch (Exception $e) {
         Log::error("Delete Role Error: " . $e->getMessage());
-        return redirect()->back()->with('error', 'فشل الحذف: ' . $e->getMessage());
+        return redirect()->back()->with('error','Delete operation failed.' . $e->getMessage());
     }
 }
         
