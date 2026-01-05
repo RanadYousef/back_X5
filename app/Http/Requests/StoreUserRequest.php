@@ -10,7 +10,7 @@ class StoreUserRequest extends FormRequest
     {
         return true;
     }
-
+    // validation rules for creating user
     public function rules(): array
     {
         return [
