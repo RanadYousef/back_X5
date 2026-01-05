@@ -14,7 +14,7 @@ class ReportController extends Controller
 {
     /**
      * Undocumented function
-     *عرض صفحة البداية للتقارير
+     *display the initial report page
      * @return void
      */
     public function index(){
@@ -29,54 +29,54 @@ class ReportController extends Controller
         $start = $validated['start_date'];
         $end = $validated['end_date'];
         /**
-         * تقرير عن الاستعارات
+         * book rating report
          */
         $reports =Borrowing::with(['user','book'])->whereBetween('created_at', [$start,$end])
         ->get();
         /**
-         * الكتب الأعلى تقييما
+         * top rated books
          */
         $topRatedBooks = Book::orderBy('overall_rating','desc')->take(5)->get();
         /**
-         * الكتب الأقل تقييما
+         * lowest rated books
          */
         $lowestRatedBooks =Book::orderBy('overall_rating','asc')->take(5)->get();
     /**
-     * متوسط التقييم
+     * average rating
      */
         $avgRating = Book::avg('overall_rating');
     /**
-     * الكتب الأكثر استعارة
+     * most borrowed books
      */
         $mostBorrowed = Book::withCount(['borrowings' => function($q) use ($start , $end){
         $q->whereBetween('created_at',[$start,$end]); }
     ])->orderBy('borrowings_count','desc')->take(5)->get();
     /**
-     * الكتب الأقل استعارة
+     * least borrowed books
      */
     $leastBorrowed = Book::withCount(['borrowings'=>function($q) use ($start ,$end) {
         $q->whereBetween('created_at', [$start,$end]);
     }
     ])->orderBy('borrowings_count','asc')->take(5)->get();
     /**
-     * متوسط الاستعارة
+     * average borrowing rate
      */
     $avgBorrowingCount = $reports->count() / max(Book::count(),1);
     /**
-     * الاستعارات النشطة
+     * active borrowings
      */
     $activeBorrowings = Borrowing::whereNull('returned_at')
                 ->whereBetween('created_at', [$start, $end])
                 ->with(['user', 'book'])
                 ->get();
             /**
-             *  * الكتب المتاحة
+             * available books
              */
 $availableBooks = Book::whereDoesntHave('borrowings', function($q) {
                 $q->whereNull('returned_at');
             })->get();
             /**
- * أفضل الزبائن الأكثر استعارة        
+             * top customers (most borrowed)
              */
             $topCustomers = User::withCount(['borrowings' => function($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
