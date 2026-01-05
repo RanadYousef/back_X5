@@ -11,7 +11,7 @@ class UpdateCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,9 +21,9 @@ class UpdateCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-       return [
-        // استثناء المعرف الحالي من فحص التكرار
-        'name' => 'required|string|max:255|unique:categories,name,' . $this->category->id,
-    ];
+        return [
+            // استثناء المعرف الحالي من فحص التكرار
+            'name' => 'required|string|max:255|unique:categories,name,' . $this->category->id,
+        ];
     }
 }
