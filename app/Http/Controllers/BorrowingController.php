@@ -5,77 +5,103 @@ namespace App\Http\Controllers;
 use App\Models\Borrowing;
 use App\Models\Book;
 use App\Http\Requests\StoreBorrowingRequest;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 /**
- * كنترولر إدارة الاستعارات
+ * Class BorrowingController
+ *
+ * Handles book borrowing and returning operations.
  */
 class BorrowingController extends Controller
 {
     /**
-     * عرض جميع عمليات الاستعارة
+     * Display a listing of borrowings.
+     *
+     * @return \Illuminate\View\View
      */
     public function index()
     {
-        $borrowings = Borrowing::with(['book', 'user'])->get();
+        $borrowings = Borrowing::with(['book', 'user'])->latest()->get();
         return view('borrowings.index', compact('borrowings'));
     }
 
     /**
-     * عرض نموذج الاستعارة
+     * Show the form for creating a new borrowing.
+     *
+     * @return \Illuminate\View\View
      */
     public function create()
     {
-        return view('borrowings.create');
+        $books = Book::where('copies_number', '>', 0)->get();
+        return view('borrowings.create', compact('books'));
     }
 
     /**
-     * تنفيذ عملية استعارة كتاب
+     * Store a newly created borrowing in storage.
+     *
+     * @param StoreBorrowingRequest $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreBorrowingRequest $request)
     {
+        $data = $request->validated();
+
         try {
-            // جلب الكتاب
-            $book = Book::findOrFail($request->book_id);
+            DB::transaction(function () use ($data) {
 
-            // التحقق من توفر نسخ
-            if ($book->copies_number < 1) {
-                return back()->with('error', 'الكتاب غير متوفر');
-            }
+                $book = Book::lockForUpdate()->findOrFail($data['book_id']);
 
-            // إنشاء سجل الاستعارة
-            Borrowing::create([
-                'book_id' => $book->id,
-                'user_id' => auth()->id(),
-                'status'  => 'borrowed',
-            ]);
+                if ($book->copies_number < 1) {
+                    throw new \Exception('Book not available.');
+                }
 
-            // إنقاص عدد النسخ
-            $book->decrement('copies_number');
+                Borrowing::create([
+                    'book_id'     => $book->id,
+                    'user_id'     => Auth::id(),
+                    'borrowed_at' => now(),
+                    'status'      => 'borrowed',
+                ]);
+
+                $book->decrement('copies_number');
+            });
 
             return redirect()->route('borrowings.index')
-                ->with('success', 'تمت استعارة الكتاب بنجاح');
+                ->with('success', 'Book borrowed successfully.');
+
         } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ أثناء الاستعارة');
+            return back()->with('error', 'Borrowing operation failed.');
         }
     }
 
     /**
-     * إرجاع كتاب مستعار
+     * Return a borrowed book.
+     *
+     * @param Borrowing $borrowing
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function returnBook(Borrowing $borrowing)
     {
         try {
             if ($borrowing->status === 'returned') {
-                return back()->with('error', 'الكتاب مُعاد مسبقًا');
+                return back()->with('error', 'This book has already been returned.');
             }
 
-            $borrowing->update(['status' => 'returned']);
-            $borrowing->book->increment('copies_number');
+            DB::transaction(function () use ($borrowing) {
+
+                $borrowing->update([
+                    'status'      => 'returned',
+                    'returned_at' => now(),
+                ]);
+
+                $borrowing->book->increment('copies_number');
+            });
 
             return redirect()->route('borrowings.index')
-                ->with('success', 'تم إرجاع الكتاب بنجاح');
+                ->with('success', 'Book returned successfully.');
+
         } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ أثناء إرجاع الكتاب');
+            return back()->with('error', 'Return operation failed.');
         }
     }
 }
