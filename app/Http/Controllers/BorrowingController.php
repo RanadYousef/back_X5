@@ -6,51 +6,61 @@ use App\Models\Borrowing;
 use App\Models\Book;
 use App\Http\Requests\StoreBorrowingRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Class BorrowingController
  *
- * Handles borrowing operations.
+ * Handles book borrowing and returning operations.
  */
 class BorrowingController extends Controller
 {
     /**
      * Display a listing of borrowings.
+     *
+     * @return \Illuminate\View\View
      */
     public function index()
     {
-        $borrowings = Borrowing::with(['book', 'user'])->get();
+        $borrowings = Borrowing::with(['book', 'user'])->latest()->get();
         return view('borrowings.index', compact('borrowings'));
     }
 
     /**
      * Show the form for creating a new borrowing.
+     *
+     * @return \Illuminate\View\View
      */
     public function create()
     {
-        return view('borrowings.create');
+        $books = Book::where('copies_number', '>', 0)->get();
+        return view('borrowings.create', compact('books'));
     }
 
     /**
-     * Store a newly created borrowing.
+     * Store a newly created borrowing in storage.
+     *
+     * @param StoreBorrowingRequest $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreBorrowingRequest $request)
     {
-        try {
-            DB::transaction(function () use ($request) {
+        $data = $request->validated();
 
-                $data = $request->validated();
+        try {
+            DB::transaction(function () use ($data) {
 
                 $book = Book::lockForUpdate()->findOrFail($data['book_id']);
 
                 if ($book->copies_number < 1) {
-                    throw new \Exception('Book not available');
+                    throw new \Exception('Book not available.');
                 }
 
                 Borrowing::create([
-                    'book_id' => $book->id,
-                    'user_id' => auth()->id(),
-                    'status'  => 'borrowed',
+                    'book_id'     => $book->id,
+                    'user_id'     => Auth::id(),
+                    'borrowed_at' => now(),
+                    'status'      => 'borrowed',
                 ]);
 
                 $book->decrement('copies_number');
@@ -66,17 +76,23 @@ class BorrowingController extends Controller
 
     /**
      * Return a borrowed book.
+     *
+     * @param Borrowing $borrowing
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function returnBook(Borrowing $borrowing)
     {
         try {
+            if ($borrowing->status === 'returned') {
+                return back()->with('error', 'This book has already been returned.');
+            }
+
             DB::transaction(function () use ($borrowing) {
 
-                if ($borrowing->status === 'returned') {
-                    throw new \Exception('Already returned');
-                }
-
-                $borrowing->update(['status' => 'returned']);
+                $borrowing->update([
+                    'status'      => 'returned',
+                    'returned_at' => now(),
+                ]);
 
                 $borrowing->book->increment('copies_number');
             });

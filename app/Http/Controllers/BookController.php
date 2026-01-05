@@ -5,70 +5,111 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 /**
+ * Class BookController
+ *
  * Handles CRUD operations for books.
  */
 class BookController extends Controller
 {
     /**
-     * Display all books.
+     * Display a listing of books.
      */
     public function index()
     {
-        $books = Book::with('category')->get();
+        $books = Book::with('category')->latest()->paginate(10);
         return view('books.index', compact('books'));
     }
 
     /**
-     * Store a new book.
+     * Show the form for creating a new book.
+     */
+    public function create()
+    {
+        return view('books.create');
+    }
+
+    /**
+     * Store a newly created book.
      */
     public function store(StoreBookRequest $request)
     {
+        $data = $request->validated();
+
         try {
-            DB::transaction(function () use ($request) {
-                Book::create($request->validated());
-            });
+            if ($request->hasFile('cover_image')) {
+                $data['cover_image'] = $request->file('cover_image')
+                    ->store('books/covers', 'public');
+            }
+
+            Book::create($data);
 
             return redirect()->route('books.index')
                 ->with('success', 'Book created successfully.');
+
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to create book.');
         }
     }
 
     /**
-     * Update a book.
+     * Show the form for editing the specified book.
+     */
+    public function edit(Book $book)
+    {
+        return view('books.edit', compact('book'));
+    }
+
+    /**
+     * Update the specified book.
      */
     public function update(UpdateBookRequest $request, Book $book)
     {
+        $data = $request->validated();
+
         try {
-            DB::transaction(function () use ($request, $book) {
-                $book->update($request->validated());
-            });
+            if ($request->hasFile('cover_image')) {
+
+
+                if ($book->cover_image && Storage::disk('public')->exists($book->cover_image)) {
+                    Storage::disk('public')->delete($book->cover_image);
+                }
+
+
+                $data['cover_image'] = $request->file('cover_image')
+                    ->store('books/covers', 'public');
+            }
+
+            $book->update($data);
 
             return redirect()->route('books.index')
                 ->with('success', 'Book updated successfully.');
+
         } catch (\Exception $e) {
-            return back()->with('error', 'Failed to update book.');
+            return back()->with('error', 'Update failed.');
         }
     }
 
     /**
-     * Delete a book.
+     * Remove the specified book.
      */
     public function destroy(Book $book)
     {
         try {
-            DB::transaction(function () use ($book) {
-                $book->delete();
-            });
+
+            if ($book->cover_image && Storage::disk('public')->exists($book->cover_image)) {
+                Storage::disk('public')->delete($book->cover_image);
+            }
+
+            $book->delete();
 
             return redirect()->route('books.index')
                 ->with('success', 'Book deleted successfully.');
+
         } catch (\Exception $e) {
-            return back()->with('error', 'Failed to delete book.');
+            return back()->with('error', 'Delete failed.');
         }
     }
 }
