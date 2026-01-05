@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\ReviewController;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\RolePermissionController;
@@ -72,9 +73,24 @@ Route::get('categories/{category}', [CategoryController::class, 'show'])->name('
 
 
 
+// عرض جميع التقييمات (admin | employee)
+Route::middleware(['auth', 'role:admin|employee'])->group(function () {
+    Route::get('/reviews', [ReviewController::class, 'index'])
+        ->name('reviews.index');
+});
 
+// إدارة التقييمات (employee فقط)
+Route::middleware(['auth', 'role:employee'])->group(function () {
 
+    Route::patch('/reviews/{review}/approve', [ReviewController::class, 'approve'])
+        ->name('reviews.approve');
 
+    Route::patch('/reviews/{review}/reject', [ReviewController::class, 'reject'])
+        ->name('reviews.reject');
+
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])
+        ->name('reviews.destroy');
+});
 
 
 require __DIR__.'/auth.php';
