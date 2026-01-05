@@ -1,24 +1,120 @@
-{{-- عرض رسالة خطأ عامة إذا وجدت --}}
-@if(session('error'))
-    <div style="color: red;">{{ session('error') }}</div>
-@endif
+<!DOCTYPE html>
+<html lang="en">
 
-<h2>إضافة نوع كتاب جديد</h2>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Category</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
 
-<form action="{{ route('categories.store') }}" method="POST">
-    @csrf
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-    <div>
-        <label for="name">اسم التصنيف:</label>
-        <input type="text" name="name" id="name" value="{{ old('name') }}" required>
-        
-        {{-- عرض خطأ التحقق الخاص بالحقل --}}
-        @error('name')
-            <span style="color: red;">{{ $message }}</span>
-        @enderror
+        .header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            display: inline-block;
+        }
+
+        .btn-save {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Add New Category</h1>
+        </div>
+
+        @if(session('error'))
+            <div class="alert-error">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        <form action="{{ route('categories.store') }}" method="POST">
+            @csrf
+
+            <div class="form-group">
+                <label for="name">Category Name</label>
+                <input type="text" name="name" id="name" value="{{ old('name') }}" placeholder="Enter category name">
+
+                @error('name')
+                    <div class="error-message">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div style="margin-top: 20px;">
+                <a href="{{ route('categories.index') }}" class="btn btn-back">Back</a>
+                <button type="submit" class="btn btn-save">Save Category</button>
+            </div>
+        </form>
     </div>
 
-    <br>
-    <button type="submit">حفظ التصنيف</button>
-    <a href="{{ route('categories.index') }}">إلغاء</a>
-</form>
+</body>
+
+</html>
