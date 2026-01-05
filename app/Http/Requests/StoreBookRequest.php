@@ -24,9 +24,14 @@ class StoreBookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'       => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'copies_number'    => 'required|integer|min:1',
+            'category_id'   => 'required|exists:categories,id',
+        'title'         => 'required|string|max:255',
+        'author'        => 'required|string|max:255',
+        'description'   => 'required|string',
+        'publish_year'  => 'required|integer|min:1000|max:' . date('Y'),
+        'language'      => 'required|string|max:50',
+        'copies_number' => 'required|integer|min:0',
+        'cover_image'   => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ];
     }
 }

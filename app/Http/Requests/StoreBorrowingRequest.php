@@ -17,7 +17,10 @@ class StoreBorrowingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'book_id' => 'required|exists:books,id',
+           'user_id' => 'required|exists:users,id',  
+        'book_id' => 'required|exists:books,id', 
+        'borrowed_at' => 'required|date|before_or_equal:today',
+        'status' => 'required|in:borrowed,returned,overdue',
         ];
     }
 }
