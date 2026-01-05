@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Main Web Routes Configuration
+ * This file contains all the routes for the application including
+ * Authentication, Book Management, Role/Permission Management, and Reporting.
+ */
+
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
@@ -19,7 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-}); 
+});
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -28,19 +34,19 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth', 'role:admin|employee'])->group(function () {
 
-    // مسارات إدارة الكتب
+    // Book Management Routes
     Route::resource('books', BookController::class);
 
-    // عرض جميع عمليات الاستعارة
+    // View all borrowing operations
     Route::get('borrowings', [BorrowingController::class, 'index'])
         ->name('borrowings.index');
-   // عرض نموذج إنشاء عملية استعارة
+    // Show the form to create a borrowing operation
     Route::get('borrowings/create', [BorrowingController::class, 'create'])
         ->name('borrowings.create');
-   // تنفيذ عملية استعارة كتاب
+    // Execute a book borrowing operation
     Route::post('borrowings', [BorrowingController::class, 'store'])
         ->name('borrowings.store');
-    // إرجاع كتاب مستعار
+    // Return a borrowed book
     Route::patch('borrowings/{borrowing}/return', [BorrowingController::class, 'returnBook'])
         ->name('borrowings.return');
 });
@@ -56,30 +62,33 @@ Route::get('/', function () {
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('users', UserManagementController::class);
 });
-// RolePermission الراواتات الخاصة ب 
-// يديرها الادمن فقط
+
+// Role & Permission Routes
+// Managed by Admin only
 Route::middleware(['auth', 'role:admin'])->group(function () {
-Route::resource('roles', RolePermissionController::class);
+    Route::resource('roles', RolePermissionController::class);
 });
-//  category الراواتات الخاصة ب 
-//تم استثناء 'index', 'show' لانها عامة و تظهر للزائر و المشترك ايضا
+
+// Category Management Routes
+// 'index' and 'show' are excluded because they are public for guests and subscribers
 Route::middleware(['auth', 'permission:manage categories'])->group(function () {
     Route::resource('categories', CategoryController::class)->except(['index', 'show']);
 });
-//  المسارات المتاحة للجميع (الزوار والمشتركين والكل)
+
+// Public Routes (Available for guests, subscribers, and all users)
 Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
 
 
 
 
-// عرض جميع التقييمات (admin | employee)
+// View all reviews (admin | employee)
 Route::middleware(['auth', 'role:admin|employee'])->group(function () {
     Route::get('/reviews', [ReviewController::class, 'index'])
         ->name('reviews.index');
 });
 
-// إدارة التقييمات (employee فقط)
+// Review Management (Employee only)
 Route::middleware(['auth', 'role:employee'])->group(function () {
 
     Route::patch('/reviews/{review}/approve', [ReviewController::class, 'approve'])
@@ -93,4 +102,4 @@ Route::middleware(['auth', 'role:employee'])->group(function () {
 });
 
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
