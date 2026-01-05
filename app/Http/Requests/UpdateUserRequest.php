@@ -10,7 +10,7 @@ class UpdateUserRequest extends FormRequest
     {
         return true;
     }
-
+    // validation rules for updating user
     public function rules(): array
     {
         return [
