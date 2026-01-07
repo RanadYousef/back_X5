@@ -38,6 +38,7 @@ class UserManagementController extends Controller
     }
 
     /**
+     * 
      * store new user
      */
     public function store(StoreUserRequest $request)
