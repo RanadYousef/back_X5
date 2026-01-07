@@ -93,8 +93,8 @@ Route::middleware(['auth', 'role:admin|employee'])->group(function () {
         ->name('reviews.index');
 });
 
-// Review Management (Employee only)
-Route::middleware(['auth', 'role:employee'])->group(function () {
+// Review Management (Admin | Employee)
+Route::middleware(['auth', 'role:admin|employee'])->group(function () {
 
     Route::patch('/reviews/{review}/approve', [ReviewController::class, 'approve'])
         ->name('reviews.approve');

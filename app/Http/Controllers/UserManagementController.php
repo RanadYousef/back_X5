@@ -104,7 +104,17 @@ class UserManagementController extends Controller
                 ->with('error', 'failed to update user');
         }
     }
+    /**
+     * show user details
+     */
+     
+    public function show(User $user)
+    {
+        return view('users.show', compact('user'));
+        
+    }
 
+ 
     /**
      *destory user 
      */
