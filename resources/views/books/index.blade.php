@@ -19,6 +19,8 @@
                 <tr class="text-warning">
                     <th>Cover</th>
                     <th>Title</th>
+                    <th>Category</th>
+                    <th>Description</th>
                     <th>Author</th>
                     <th>Year</th>
                     <th>Language</th>
@@ -30,6 +32,8 @@
             <tbody>
                 @forelse($books as $book)
                     <tr>
+
+                        {{-- COVER --}}
                         <td>
                             @if($book->cover_image)
                                 <img src="{{ asset('storage/'.$book->cover_image) }}"
@@ -40,17 +44,38 @@
                             @endif
                         </td>
 
+                        {{-- TITLE --}}
                         <td class="fw-semibold">{{ $book->title }}</td>
+
+                        {{-- CATEGORY --}}
+                        <td>{{ $book->category->name ?? '—' }}</td>
+
+                        {{-- DESCRIPTION WITH TOOLTIP --}}
+                        <td style="max-width: 250px;">
+                            <span data-bs-toggle="tooltip" 
+                                  data-bs-placement="top"
+                                  title="{{ $book->description }}">
+                                {{ \Illuminate\Support\Str::limit($book->description, 60) }}
+                            </span>
+                        </td>
+
+                        {{-- AUTHOR --}}
                         <td>{{ $book->author }}</td>
+
+                        {{-- YEAR --}}
                         <td>{{ $book->publish_year }}</td>
+
+                        {{-- LANGUAGE --}}
                         <td>{{ $book->language }}</td>
 
+                        {{-- COPIES --}}
                         <td>
                             <span class="badge bg-success fs-6">
                                 {{ $book->copies_number }}
                             </span>
                         </td>
 
+                        {{-- ACTIONS --}}
                         <td class="d-flex justify-content-center gap-2">
                             <a href="{{ route('books.edit', $book) }}"
                                class="btn btn-sm btn-outline-warning">
@@ -70,7 +95,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-muted py-4">
+                        <td colspan="9" class="text-muted py-4">
                             No books available
                         </td>
                     </tr>
@@ -80,4 +105,15 @@
     </div>
 
 </div>
+
+{{-- Tooltip Activation --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
+
 @endsection
