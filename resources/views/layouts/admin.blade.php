@@ -59,7 +59,8 @@
     <div class="ms-auto d-flex gap-3">
         <a href="{{ route('books.index') }}" class="btn btn-outline-warning btn-sm">Books</a>
         <a href="{{ route('borrowings.index') }}" class="btn btn-outline-warning btn-sm">Borrowings</a>
-
+        <a href="{{ route('categories.index') }}" class="btn btn-outline-warning btn-sm">Categories</a>
+        <a href="{{ route('roles.index') }}" class="btn btn-outline-warning btn-sm">Roles</a>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button class="btn btn-outline-light btn-sm">Logout</button>

@@ -1,120 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Category</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            background-color: #f9f9f9;
-        }
+@section('content')
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card-glass">
+            
+            <div class="header mb-4">
+                <h3 class="text-warning"><i class="bi bi-folder-plus me-2"></i>Add New Category</h3>
+            </div>
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+            {{-- رسالة الخطأ العامة --}}
+            @if(session('error'))
+                <div class="alert alert-danger bg-danger text-white border-0 shadow-sm mb-4">
+                    {{ session('error') }}
+                </div>
+            @endif
 
-        .header {
-            margin-bottom: 20px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
+            <form action="{{ route('categories.store') }}" method="POST">
+                @csrf
 
-        .form-group {
-            margin-bottom: 15px;
-        }
+                <div class="mb-4">
+                    <label for="name" class="form-label fw-bold text-white">Category Name</label>
+                    <input type="text" 
+                           name="name" 
+                           id="name" 
+                           class="form-control bg-dark text-white border-secondary focus-ring focus-ring-warning" 
+                           value="{{ old('name') }}" 
+                           placeholder="Enter category name">
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
+                    {{-- عرض أخطاء التحقق --}}
+                    @error('name')
+                        <div class="text-danger small mt-2">{{ $message }}</div>
+                    @enderror
+                </div>
 
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        .btn {
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            display: inline-block;
-        }
-
-        .btn-save {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .btn-back {
-            background-color: #6c757d;
-            color: white;
-            margin-right: 10px;
-        }
-
-        .error-message {
-            color: #dc3545;
-            font-size: 13px;
-            margin-top: 5px;
-        }
-
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            border: 1px solid #f5c6cb;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="container">
-        <div class="header">
-            <h1>Add New Category</h1>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-3d px-4">
+                        <i class="bi bi-check-circle me-1"></i>Save Category
+                    </button>
+                    
+                    <a href="{{ route('categories.index') }}" class="btn btn-outline-light px-4">
+                        Back
+                    </a>
+                </div>
+            </form>
         </div>
-
-        @if(session('error'))
-            <div class="alert-error">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        <form action="{{ route('categories.store') }}" method="POST">
-            @csrf
-
-            <div class="form-group">
-                <label for="name">Category Name</label>
-                <input type="text" name="name" id="name" value="{{ old('name') }}" placeholder="Enter category name">
-
-                @error('name')
-                    <div class="error-message">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div style="margin-top: 20px;">
-                <a href="{{ route('categories.index') }}" class="btn btn-back">Back</a>
-                <button type="submit" class="btn btn-save">Save Category</button>
-            </div>
-        </form>
     </div>
-
-</body>
-
-</html>
+</div>
+@endsection

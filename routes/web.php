@@ -11,6 +11,7 @@ use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\Admin\DashboardController;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\RolePermissionController;
@@ -19,6 +20,10 @@ use App\Http\Controllers\CategoryController;
 
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BorrowingController;
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+});
 
 
 Route::middleware('auth')->group(function () {
