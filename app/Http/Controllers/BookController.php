@@ -6,6 +6,7 @@ use App\Models\Book;
 use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Category;
 
 /**
  * Class BookController
@@ -28,7 +29,9 @@ class BookController extends Controller
      */
     public function create()
     {
-        return view('books.create');
+        $categories = Category::all();
+
+        return view('books.create', compact('categories'));
     }
 
     /**
@@ -59,7 +62,8 @@ class BookController extends Controller
      */
     public function edit(Book $book)
     {
-        return view('books.edit', compact('book'));
+        $categories = Category::all();
+        return view('books.edit', compact('book', 'categories'));
     }
 
     /**
