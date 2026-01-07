@@ -1,145 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <title>Roles Management</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            background-color: #f9f9f9;
-        }
+@section('content')
+<div class="card-glass">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
+        <h3 class="text-warning mb-0">
+            <i class="bi bi-shield-lock me-2"></i>Roles & Permissions
+        </h3>
+        <a href="{{ route('roles.create') }}" class="btn btn-3d">
+            <i class="bi bi-plus-circle me-1"></i> New Role
+        </a>
+    </div>
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        th {
-            background-color: #f4f4f4;
-        }
-
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .badge {
-            background: #e0e7ff;
-            color: #4338ca;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            margin-right: 4px;
-            display: inline-block;
-            margin-bottom: 4px;
-        }
-
-        .btn {
-            text-decoration: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 13px;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-add {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-edit {
-            background: #007bff;
-            color: white;
-        }
-
-        .btn-delete {
-            background: #dc3545;
-            color: white;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Roles & Permissions</h1>
-            <a href="{{ route('roles.create') }}" class="btn btn-add">+ New Role</a>
+    @if(session('success'))
+        <div class="alert alert-success bg-success text-white border-0 shadow-sm mb-4">
+            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
         </div>
+    @endif
 
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+    @if(session('error'))
+        <div class="alert alert-danger bg-danger text-white border-0 shadow-sm mb-4">
+            <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+        </div>
+    @endif
 
-        @if(session('error'))
-            <div class="alert alert-error">{{ session('error') }}</div>
-        @endif
-
-        <table>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle border-secondary">
             <thead>
-                <tr>
-                    <th>Role Name</th>
-                    <th width="50%">Permissions</th>
-                    <th>Actions</th>
+                <tr class="text-warning">
+                    <th width="20%">Role Name</th>
+                    <th width="55%">Permissions</th>
+                    <th width="25%" class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($roles as $role)
-                    <tr>
-                        <td><strong>{{ ucfirst($role->name) }}</strong></td>
+                    <tr class="border-secondary">
+                        <td>
+                            <strong class="text-white text-uppercase">{{ $role->name }}</strong>
+                        </td>
                         <td>
                             @foreach($role->permissions as $permission)
-                                <span class="badge">{{ $permission->name }}</span>
+                                <span class="badge bg-dark border border-warning text-warning fw-light m-1" style="font-size: 0.75rem;">
+                                    <i class="bi bi-key-fill me-1" style="font-size: 0.65rem;"></i>{{ $permission->name }}
+                                </span>
                             @endforeach
                         </td>
                         <td>
-                            <div style="display: flex; gap: 5px;">
-                                <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-edit">Edit</a>
+                            <div class="d-flex justify-content-center gap-2">
+                                <a href="{{ route('roles.edit', $role->id) }}" 
+                                   class="btn btn-outline-warning btn-sm">
+                                    <i class="bi bi-pencil me-1"></i> Edit
+                                </a>
+
                                 <form action="{{ route('roles.destroy', $role->id) }}" method="POST"
-                                    onsubmit="return confirm('Are you sure?')">
+                                      onsubmit="return confirm('Are you sure you want to delete this role?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-delete">Delete</button>
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash me-1"></i> Delete
+                                    </button>
                                 </form>
                             </div>
                         </td>
@@ -148,6 +67,5 @@
             </tbody>
         </table>
     </div>
-</body>
-
-</html>
+</div>
+@endsection

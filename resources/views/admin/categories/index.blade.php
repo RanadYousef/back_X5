@@ -1,152 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Categories Management</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            background-color: #f9f9f9;
-        }
+@section('content')
+<div class="card-glass">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
+        <h3 class="text-warning mb-0">
+            <i class="bi bi-tags me-2"></i>Categories List
+        </h3>
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+        @can('manage categories')
+            <a href="{{ route('categories.create') }}" class="btn btn-3d">
+                <i class="bi bi-plus-lg me-1"></i>Add New Category
+            </a>
+        @endcan
+    </div>
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        th {
-            background-color: #f4f4f4;
-        }
-
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .btn {
-            text-decoration: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            display: inline-block;
-        }
-
-        .btn-create {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .btn-edit {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .btn-show {
-            background-color: #17a2b8;
-            color: white;
-        }
-
-        .btn-delete {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .actions {
-            display: flex;
-            gap: 5px;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="container">
-        <div class="header">
-            <h1>Categories List</h1>
-
-            @can('manage categories')
-                <a href="{{ route('categories.create') }}" class="btn btn-create">Add New Category</a>
-            @endcan
+    @if(session('success'))
+        <div class="alert alert-success bg-success text-white border-0 shadow-sm mb-4">
+            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
         </div>
+    @endif
 
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+    @if(session('error'))
+        <div class="alert alert-danger bg-danger text-white border-0 shadow-sm mb-4">
+            <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+        </div>
+    @endif
 
-        @if(session('error'))
-            <div class="alert alert-error">{{ session('error') }}</div>
-        @endif
-
-        <table>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle border-secondary">
             <thead>
-                <tr>
-                    <th>ID</th>
+                <tr class="text-warning">
+                    <th width="10%">ID</th>
                     <th>Category Name</th>
-                    <th>Books Count</th>
-                    <th>Actions</th>
+                    <th width="20%">Books Count</th>
+                    <th width="25%" class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($categories as $category)
-                    <tr>
-                        <td>{{ $category->id }}</td>
-                        <td><strong>{{ $category->name }}</strong></td>
-                        <td>{{ $category->books_count }} Books</td>
+                    <tr class="border-secondary">
+                        <td class="text-secondary">#{{ $category->id }}</td>
                         <td>
-                            <div class="actions">
-                                <a href="{{ route('categories.show', $category->id) }}" class="btn btn-show">View</a>
+                            <span class="fw-bold text-light">{{ $category->name }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-dark border border-warning text-warning px-3 py-2">
+                                <i class="bi bi-book me-1"></i>{{ $category->books_count }} Books
+                            </span>
+                        </td>
+                        <td>
+                            <div class="actions d-flex justify-content-center gap-2">
+                                <a href="{{ route('categories.show', $category->id) }}" 
+                                   class="btn btn-outline-info btn-sm shadow-sm">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
 
                                 @can('manage categories')
-                                    <a href="{{ route('categories.edit', $category->id) }}" class="btn btn-edit">Edit</a>
+                                    <a href="{{ route('categories.edit', $category->id) }}" 
+                                       class="btn btn-outline-warning btn-sm shadow-sm">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
 
                                     <form action="{{ route('categories.destroy', $category->id) }}" method="POST"
-                                        onsubmit="return confirm('Are you sure?')">
+                                          onsubmit="return confirm('Are you sure you want to delete this category?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-delete">Delete</button>
+                                        <button type="submit" class="btn btn-outline-danger btn-sm shadow-sm">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
                                     </form>
                                 @endcan
                             </div>
@@ -154,13 +75,14 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" style="text-align: center;">No categories found.</td>
+                        <td colspan="4" class="text-center py-5 text-secondary">
+                            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                            No categories found.
+                        </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-
-</body>
-
-</html>
+</div>
+@endsection

@@ -1,46 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Create Role</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; }
-        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 10px; }
-        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        .permissions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f4f4f4; padding: 15px; border-radius: 5px; }
-        .checkbox-item { display: flex; align-items: center; font-size: 14px; }
-        .checkbox-item input { margin-right: 8px; }
-        .btn-save { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h1>Create New Role</h1>
-    <form action="{{ route('roles.store') }}" method="POST">
-        @csrf
-        <div class="form-group">
-            <label>Role Name</label>
-            <input type="text" name="name" value="{{ old('name') }}" placeholder="e.g. Manager">
-            @error('name') <small style="color: red;">{{ $message }}</small> @enderror
-        </div>
+@extends('layouts.admin')
 
-        <div class="form-group">
-            <label>Assign Permissions</label>
-            <div class="permissions-grid">
-                @foreach($permissions as $permission)
-                <div class="checkbox-item">
-                    <input type="checkbox" name="permissions[]" value="{{ $permission->name }}" id="p-{{ $permission->id }}">
-                    <label for="p-{{ $permission->id }}" style="font-weight: normal; margin-bottom: 0;">{{ $permission->name }}</label>
-                </div>
-                @endforeach
+@section('content')
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card-glass">
+            
+            <div class="header mb-4 pb-3 border-bottom border-secondary text-warning">
+                <h3><i class="bi bi-shield-plus me-2"></i>Create New Role</h3>
             </div>
-        </div>
 
-        <button type="submit" class="btn-save">Save Role</button>
-        <a href="{{ route('roles.index') }}" style="margin-left: 10px; color: #666;">Cancel</a>
-    </form>
+            <form action="{{ route('roles.store') }}" method="POST">
+                @csrf
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-white">Role Name</label>
+                    <input type="text" 
+                           name="name" 
+                           class="form-control bg-dark text-white border-secondary focus-ring focus-ring-warning" 
+                           value="{{ old('name') }}" 
+                           placeholder="e.g. Content Manager">
+                    @error('name') 
+                        <div class="text-danger small mt-2">{{ $message }}</div> 
+                    @enderror
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-warning border-bottom border-warning mb-3">
+                        <i class="bi bi-check2-all me-1"></i> Assign Permissions
+                    </label>
+                    
+                    <div class="row g-3 p-3 rounded bg-dark border border-secondary shadow-inner">
+                        @foreach($permissions as $permission)
+                        <div class="col-md-4">
+                            <div class="form-check form-switch p-2 rounded hover-effect">
+                                <input class="form-check-input ms-0 me-2" 
+                                       type="checkbox" 
+                                       name="permissions[]" 
+                                       value="{{ $permission->name }}" 
+                                       id="p-{{ $permission->id }}">
+                                <label class="form-check-label text-light fs-6" for="p-{{ $permission->id }}">
+                                    {{ $permission->name }}
+                                </label>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <hr class="border-secondary my-4">
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-3d px-5">
+                        <i class="bi bi-cloud-upload me-1"></i> Save Role
+                    </button>
+                    <a href="{{ route('roles.index') }}" class="btn btn-outline-light px-4">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
-</body>
-</html>
+
+<style>
+    .hover-effect:hover {
+        background: rgba(245, 158, 11, 0.1);
+        transition: 0.3s;
+    }
+    
+    .shadow-inner {
+        box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    }
+</style>
+@endsection
