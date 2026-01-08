@@ -54,6 +54,10 @@ Route::middleware(['auth', 'role:admin|employee'])->group(function () {
     // Return a borrowed book
     Route::patch('borrowings/{borrowing}/return', [BorrowingController::class, 'returnBook'])
         ->name('borrowings.return');
+    Route::get('/categories/trash', [CategoryController::class, 'trash'])->name('categories.trash');
+    Route::post('/categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
+    Route::delete('/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.forceDelete');
+
 });
 
 Route::group(['middleware' => ['auth', 'role:admin|employee']], function () {
