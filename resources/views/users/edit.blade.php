@@ -1,28 +1,34 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('content')
-<div class="container">
-    <h3 class="mb-4">Edit User</h3>
 
-    <form action="{{ route('users.update', $user) }}" method="POST">
+<div class="card-glass col-md-6 mx-auto">
+    <h4 class="mb-4">
+        <i class="bi bi-person-gear text-warning"></i>
+        Edit User
+    </h4>
+
+    <form method="POST" action="{{ route('users.update', $user) }}">
         @csrf
         @method('PUT')
 
         <div class="mb-3">
-            <label>Name</label>
-            <input type="text" name="name" class="form-control"
-                   value="{{ old('name', $user->name) }}">
+            <label class="form-label">Name</label>
+            <input type="text" name="name"
+                   value="{{ $user->name }}"
+                   class="form-control" required>
         </div>
 
         <div class="mb-3">
-            <label>Email</label>
-            <input type="email" name="email" class="form-control"
-                   value="{{ old('email', $user->email) }}">
+            <label class="form-label">Email</label>
+            <input type="email" name="email"
+                   value="{{ $user->email }}"
+                   class="form-control" required>
         </div>
 
-        <div class="mb-3">
-            <label>Role</label>
-            <select name="role" class="form-control">
+        <div class="mb-4">
+            <label class="form-label">Role</label>
+            <select name="role" class="form-select" required>
                 @foreach($roles as $role)
                     <option value="{{ $role->name }}"
                         {{ $user->hasRole($role->name) ? 'selected' : '' }}>
@@ -32,8 +38,11 @@
             </select>
         </div>
 
-        <button class="btn btn-primary">Update</button>
-        <a href="{{ route('users.index') }}" class="btn btn-secondary">Back</a>
+        <div class="d-flex justify-content-end gap-2">
+            <a href="{{ route('users.index') }}" class="btn btn-outline-light btn-sm">Back</a>
+            <button class="btn btn-3d btn-sm">Update</button>
+        </div>
     </form>
 </div>
+
 @endsection

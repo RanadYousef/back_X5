@@ -1,82 +1,97 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('content')
 
-<div class="max-w-7xl mx-auto px-6 py-6">
+<div class="mb-4">
+    <h2 class="fw-bold text-warning">
+        <i class="bi bi-chat-square-quote"></i> Book Reviews
+    </h2>
+    <p class="text-muted">Manage and monitor book reviews</p>
+</div>
 
-    <div class="mb-6">
-        <h2 class="text-2xl font-semibold text-yellow-400">Reviews Management</h2>
-        <p class="text-gray-400 text-sm">Manage and moderate book reviews</p>
+<div class="row g-4">
+@forelse($reviews as $review)
+    <div class="col-md-6 col-lg-4">
+       <div class="card review-card h-100">
+
+            <div class="card-body d-flex flex-column">
+           
+
+
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge 
+                    @if($review->status === 'approved') bg-success
+                    @elseif($review->status === 'rejected') bg-danger
+                    @else bg-warning text-dark
+                    @endif
+                ">
+                    {{ ucfirst($review->status) }}
+                </span>
+
+                <small class="text-muted">
+                    ⭐ {{ $review->rating }}/5
+                </small>
+            </div>
+
+            <h6 class="fw-bold text-white">{{ $review->book->title }}</h6>
+
+<small class="text-light">
+    by {{ $review->user->name }}
+</small>
+
+<p class="mt-3 text-light">
+    {{ Str::limit($review->comment, 120) }}
+</p>
+
+            {{-- Actions (Employee only) --}}
+            @role('employee')
+            <div class="d-flex gap-2 mt-3">
+
+                {{-- Approve --}}
+                @if($review->status !== 'approved')
+                <form method="POST" action="{{ route('reviews.approve', $review) }}">
+                    @csrf
+                    @method('PATCH')
+                    <button class="btn btn-sm btn-success" title="Approve">
+                        <i class="bi bi-check-circle"></i>
+                    </button>
+                </form>
+                @endif      
+
+
+                {{-- Reject --}}
+                @if($review->status !== 'rejected')
+                <form method="POST" action="{{ route('reviews.reject', $review) }}">
+                    @csrf
+                    @method('PATCH')
+                    <button class="btn btn-sm btn-warning" title="Reject">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                </form>
+                @endif
+
+                {{-- Delete --}}
+                <form method="POST" action="{{ route('reviews.destroy', $review) }}">
+                    @csrf
+                    @method('DELETE')
+                    <button class="btn btn-sm btn-danger" title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+
+            </div>
+            @endrole
+
+        </div>
     </div>
-
-    <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-
-        <table class="w-full text-sm text-left text-gray-300">
-            <thead class="bg-gray-900 text-yellow-400 uppercase text-xs">
-                <tr>
-                    <th class="px-6 py-4">#</th>
-                    <th class="px-6 py-4">User</th>
-                    <th class="px-6 py-4">Book</th>
-                    <th class="px-6 py-4">Rating</th>
-                    <th class="px-6 py-4">Comment</th>
-                    <th class="px-6 py-4">Status</th>
-                    <th class="px-6 py-4">Actions</th>
-                </tr>
-            </thead>
-
-            <tbody class="divide-y divide-gray-700">
-                @foreach($reviews as $review)
-                <tr class="hover:bg-gray-700 transition">
-                    <td class="px-6 py-4">{{ $review->id }}</td>
-                    <td class="px-6 py-4">{{ $review->user->name ?? '-' }}</td>
-                    <td class="px-6 py-4">{{ $review->book->title ?? '-' }}</td>
-                    <td class="px-6 py-4 text-yellow-400 font-semibold">
-                        {{ $review->rating }}/5
-                    </td>
-                    <td class="px-6 py-4">{{ Str::limit($review->comment, 40) }}</td>
-
-                    <td class="px-6 py-4">
-                        <span class="
-                            px-3 py-1 rounded-full text-xs font-semibold
-                            {{ $review->status === 'approved' ? 'bg-green-600 text-white' : '' }}
-                            {{ $review->status === 'pending' ? 'bg-yellow-500 text-black' : '' }}
-                            {{ $review->status === 'rejected' ? 'bg-red-600 text-white' : '' }}
-                        ">
-                            {{ ucfirst($review->status) }}
-                        </span>
-                    </td>
-
-                    <td class="px-6 py-4 flex gap-2">
-                        <form method="POST" action="{{ route('reviews.approve', $review) }}">
-                            @csrf
-                            @method('PATCH')
-                            <button class="px-3 py-1 bg-green-600 rounded hover:bg-green-700 text-xs">
-                                Approve
-                            </button>
-                        </form>
-
-                        <form method="POST" action="{{ route('reviews.reject', $review) }}">
-                            @csrf
-                            @method('PATCH')
-                            <button class="px-3 py-1 bg-yellow-500 rounded hover:bg-yellow-600 text-xs text-black">
-                                Reject
-                            </button>
-                        </form>
-
-                        <form method="POST" action="{{ route('reviews.destroy', $review) }}">
-                            @csrf
-                            @method('DELETE')
-                            <button class="px-3 py-1 bg-red-600 rounded hover:bg-red-700 text-xs">
-                                Delete
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-
+@empty
+    <div class="col-12">
+        <div class="alert alert-warning text-center">
+            No reviews found.
+        </div>
     </div>
+@endforelse
 </div>
 
 @endsection

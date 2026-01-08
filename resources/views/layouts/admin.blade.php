@@ -48,6 +48,32 @@
             color: #020617;
             border: none;
         }
+
+
+
+        
+    .review-card {
+        background: linear-gradient(135deg, #facc15, #fde047);
+        color: #1f2937;
+        border-radius: 18px;
+        border: none;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        transition: transform .2s ease;
+    }
+
+    .review-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .review-card .badge {
+        font-size: 0.75rem;
+    }
+
+    .review-card .text-muted {
+        color: #374151 !important;
+    }
+
+
     </style>
 </head>
 
@@ -57,10 +83,20 @@
     <span class="brand-box">📚 LIBRARY</span>
 
     <div class="ms-auto d-flex gap-3">
+  @role('admin')
+    <a href="{{ route('users.index') }}" class="btn btn-outline-warning btn-sm">
+        <i class="bi bi-people-fill"></i> Users
+    </a>
+@endrole
+
+        
+         <a href="{{ route('reviews.index') }}" class="btn btn-outline-warning btn-sm">reviews </a>
         <a href="{{ route('books.index') }}" class="btn btn-outline-warning btn-sm">Books</a>
         <a href="{{ route('borrowings.index') }}" class="btn btn-outline-warning btn-sm">Borrowings</a>
         <a href="{{ route('categories.index') }}" class="btn btn-outline-warning btn-sm">Categories</a>
+        @role('admin')
         <a href="{{ route('roles.index') }}" class="btn btn-outline-warning btn-sm">Roles</a>
+        @endrole
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button class="btn btn-outline-light btn-sm">Logout</button>
