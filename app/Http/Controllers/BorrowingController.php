@@ -57,10 +57,10 @@ class BorrowingController extends Controller
                 }
 
                 Borrowing::create([
-                    'book_id'     => $book->id,
-                    'user_id'     => Auth::id(),
+                    'book_id' => $book->id,
+                    'user_id' => Auth::id(),
                     'borrowed_at' => now(),
-                    'status'      => 'borrowed',
+                    'status' => 'borrowed',
                 ]);
 
                 $book->decrement('copies_number');
@@ -90,11 +90,11 @@ class BorrowingController extends Controller
             DB::transaction(function () use ($borrowing) {
 
                 $borrowing->update([
-                    'status'      => 'returned',
+                    'status' => 'returned',
                     'returned_at' => now(),
                 ]);
-
-                $borrowing->book->increment('copies_number');
+                $book = $borrowing->book()->lockForUpdate()->first();
+                $book->increment('copies_number');
             });
 
             return redirect()->route('borrowings.index')
