@@ -11,6 +11,9 @@
             <a href="{{ route('categories.create') }}" class="btn btn-3d">
                 <i class="bi bi-plus-lg me-1"></i>Add New Category
             </a>
+            <a href="{{ route('categories.trash') }}" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-trash"></i> Trash Bin
+            </a>
         @endcan
     </div>
 

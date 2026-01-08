@@ -122,5 +122,22 @@ class CategoryController extends Controller
                 ->with('error', ' this category cannot be deleted');
         }
     }
+    public function trash()
+    {
+        $deletedCategories = Category::onlyTrashed()->get();
+        return view('admin.categories.trash', compact('deletedCategories'));
+    }
+
+    public function restore($id)
+    {
+        Category::withTrashed()->find($id)->restore();
+        return redirect()->route('categories.trash')->with('success', 'Category restored successfully!');
+    }
+
+    public function forceDelete($id)
+    {
+        Category::withTrashed()->find($id)->forceDelete();
+        return redirect()->route('categories.trash')->with('success', 'Category deleted permanently!');
+    }
 
 }
