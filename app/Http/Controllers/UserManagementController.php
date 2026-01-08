@@ -119,18 +119,25 @@ class UserManagementController extends Controller
     /**
      *destory user 
      */
-    public function destroy(User $user)
-    {
-        try {
-            $user->delete();
+   public function destroy(User $user)
+{
+    try {
 
-            return redirect()
-                ->route('users.index')
-                ->with('success', 'deleted user successfully');
-
-        } catch (Exception $e) {
-            return back()
-                ->with('error', 'failed to delete user');
+       // prevent deletion of yhe last manger
+       
+        if ($user->hasRole('admin') && User::role('admin')->count() === 1) {
+            return back()->with('error', 'لا يمكن حذف المدير الوحيد في النظام');
         }
+
+        $user->delete();
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'deleted user successfully');
+
+    } catch (Exception $e) {
+        return back()->with('error', 'failed to delete user');
     }
+}
+
 }

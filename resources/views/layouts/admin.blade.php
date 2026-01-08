@@ -83,12 +83,7 @@
     <span class="brand-box">📚 LIBRARY</span>
 
     <div class="ms-auto d-flex gap-3">
-  @role('admin')
-    <a href="{{ route('users.index') }}" class="btn btn-outline-warning btn-sm">
-        <i class="bi bi-people-fill"></i> Users
-    </a>
-@endrole
-
+ 
         
          <a href="{{ route('reviews.index') }}" class="btn btn-outline-warning btn-sm">reviews </a>
         <a href="{{ route('books.index') }}" class="btn btn-outline-warning btn-sm">Books</a>
@@ -97,6 +92,12 @@
         @role('admin')
         <a href="{{ route('roles.index') }}" class="btn btn-outline-warning btn-sm">Roles</a>
         @endrole
+         @role('admin')
+        <a href="{{ route('users.index') }}" class="btn btn-outline-warning btn-sm">
+         <i class="bi bi-people-fill"></i> Users
+        </a>
+        @endrole
+
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button class="btn btn-outline-light btn-sm">Logout</button>
