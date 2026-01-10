@@ -6,18 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class BorrowingRequest extends Model
 {
-    protected $fillable=[
+    protected $fillable = [
         'user_id',
         'book_id',
-    
- ];
-public function book(){
-    return $this->belongsTo(Book::class);
-}
+        'request_type',
+        'borrowing_id'
 
-public function user(){
-    return $this->belongsTo(User::class);
+    ];
+    public function book()
+    {
+        return $this->belongsTo(Book::class);
+    }
 
-}
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+
+    }
 
 }
