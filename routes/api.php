@@ -6,6 +6,7 @@ use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BorrowingRequestController;
 
 
 Route::get('/user', function (Request $request) {
@@ -18,3 +19,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
 
+
+//Route::middleware('auth:sanctum')->group(function () {
+Route::get('/borrowings/current', [BorrowingRequestController::class, 'currentBorrowings']);
+Route::get('/borrowings/history', [BorrowingRequestController::class, 'borrowingHistory']);
+Route::post('/borrowings/request-borrow', [BorrowingRequestController::class, 'requestBorrow']);
+Route::post('/borrowings/request-return/{borrowingId}', [BorrowingRequestController::class, 'requestReturn']);
+//});
