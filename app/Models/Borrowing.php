@@ -17,6 +17,15 @@ class Borrowing extends Model
         'status',
     ];
 
+    /**
+     * Dates to be treated as Carbon instances.
+     */
+    protected $casts = [
+        'borrowed_at' => 'datetime',
+        'returned_at' => 'datetime',
+    ];
+
+
     /*
       العلاقة مع المستخدم
       user (1) -> borrowings (*)
