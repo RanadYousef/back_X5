@@ -11,7 +11,7 @@ use Exception;
 class CategoryController extends BaseApiController
 {
     /**
-     * عرض جميع التصنيفات
+     * index categories
      */
     public function index()
     {
@@ -25,7 +25,7 @@ class CategoryController extends BaseApiController
     }
 
     /**
-     * عرض كتب تصنيف معين
+     * index books by category
      */
     public function books(Category $category)
     {
@@ -39,12 +39,11 @@ class CategoryController extends BaseApiController
     }
 
     /**
-     * 🔍 البحث عن تصنيف بالاسم (مرة واحدة فقط)
+     *search categories by name
      */
     public function search(SearchCategoryRequest $request)
     {
         try {
-            // ✅ Validation إضافي داخل الكونترولار (حماية إضافية)
             $validated = validator($request->all(), [
                 'name' => ['required', 'string'],
             ])->validate();
