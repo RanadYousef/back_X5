@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BorrowingRequestController;
+use App\Http\Controllers\Api\BookController;
 
 
 Route::get('/user', function (Request $request) {
@@ -26,3 +27,10 @@ Route::get('/borrowings/history', [BorrowingRequestController::class, 'borrowing
 Route::post('/borrowings/request-borrow', [BorrowingRequestController::class, 'requestBorrow']);
 Route::post('/borrowings/request-return/{borrowingId}', [BorrowingRequestController::class, 'requestReturn']);
 //});
+
+
+//BOOKS API ROUTES
+Route::get('/books', [BookController::class, 'index']);
+Route::get('/books/{id}', [BookController::class, 'show']);
+Route::get('/suggestions/most-borrowed', [BookController::class, 'mostBorrowed']);
+Route::get('/suggestions/top-rated', [BookController::class, 'topRated']);
