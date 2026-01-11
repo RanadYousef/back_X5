@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Review;
-use App\Http\Requests\StoreReviewRequest;
+use App\Models\Book;
+use App\Http\Controllers\Api\BaseApiController;
+use App\Http\Requests\Api\StoreReviewRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
-class ReviewController extends Controller
+class ReviewController extends BaseApiController
 {
    /**
     * Undocumented function
@@ -17,15 +21,17 @@ class ReviewController extends Controller
     */
     public function myReviews()
     {
+        try {
         $reviews = Review::with('book')
             ->where('user_id', auth()->id())
+            ->latest()
             ->get();
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Reviews retrieved successfully',
-            'data' => $reviews
-        ], 200);
+        return $this->success($reviews,'your reviews retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error('Error fetching reviews: ' . $e->getMessage(), ['user_id' => auth()->id]);
+            return $this->error('Failed to retrieve reviews', 500);
+        }
     }
 
     /**
@@ -34,31 +40,26 @@ class ReviewController extends Controller
      * @param StoreReviewRequest $request
      * @return void
      */
-    public function store(StoreReviewRequest $request)
+    public function store(StoreReviewRequest $request, Book $book)
     {
+        $validated = $request->validated();
         DB::beginTransaction(); 
         try {
+        
             $review = Review::create([
                 'user_id' => auth()->id(),
-                'book_id' => $request->book_id,
-                'rating'  => $request->rating, 
-                'comment' => $request->comment, 
+                'book_id' => $book->id,
+                'rating'  => $validated['rating'], 
+                'comment' => $validated['comment'], 
             ]);
 
             DB::commit();
-            return response()->json([
-                'status' => true,
-                'message' => 'Review added successfully',
-                'data' => $review
-            ], 201);
+            return $this->success($review,'Review added successfully',201);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'status' => false,
-                'message' => 'Something went wrong!',
-                'error' => $e->getMessage()
-            ], 500);
+            Log::error('Error storing review: ' . $e->getMessage(),['book_id' => $book->id]);
+            return $this->error('Failed to add review', 500,);
         }
     }
 
@@ -68,25 +69,20 @@ class ReviewController extends Controller
      * @param [type] $id
      * @return void
      */
-    public function destroy($id)
+    public function destroy(Review $review)
     {
         try {
-            $review = Review::where('id', $id)
-                ->where('user_id', auth()->id()) 
-                ->firstOrFail();
+            if ($review->user_id !==auth()->id()) {
+                return $this->error('Unauthorized to delete this review', 403);
+            }
 
             $review->delete();
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Review deleted successfully'
-            ], 200);
+            return $this->success(null, 'Review deleted successfully');
 
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Review not found or unauthorized'
-            ], 404);
+            Log::error('Error deleting review ID ' . $review->id . ': ' . $e->getMessage());
+            return $this->error('Failed to delete review', 500);
         }
     }
 

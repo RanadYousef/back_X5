@@ -30,8 +30,8 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-reviews', [ReviewController::class, 'myReviews']);
-    Route::post('/reviews', [ReviewController::class, 'store']);
-    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
+    Route::post('/reviews/{book}', [ReviewController::class, 'store']);
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy']);
 });
 
 
