@@ -37,6 +37,7 @@ Route::get('/books/{id}', [BookController::class, 'show']);
 Route::get('/suggestions/most-borrowed', [BookController::class, 'mostBorrowed']);
 Route::get('/suggestions/top-rated', [BookController::class, 'topRated']);
 
+
 // categories routes
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}/books', [CategoryController::class, 'books']);

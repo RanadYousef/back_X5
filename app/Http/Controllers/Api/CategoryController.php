@@ -100,4 +100,5 @@ class CategoryController extends BaseApiController
             return $this->error('Search failed');
         }
     }
+    
 }
