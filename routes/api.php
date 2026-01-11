@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\BorrowingRequestController;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\CategoryController;
 
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
