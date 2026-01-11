@@ -20,9 +20,9 @@ Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logo
 
 
 
-//Route::middleware('auth:sanctum')->group(function () {
-Route::get('/borrowings/current', [BorrowingRequestController::class, 'currentBorrowings']);
-Route::get('/borrowings/history', [BorrowingRequestController::class, 'borrowingHistory']);
-Route::post('/borrowings/request-borrow', [BorrowingRequestController::class, 'requestBorrow']);
-Route::post('/borrowings/request-return/{borrowingId}', [BorrowingRequestController::class, 'requestReturn']);
-//});
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/borrowings/current', [BorrowingRequestController::class, 'currentBorrowings']);
+    Route::get('/borrowings/history', [BorrowingRequestController::class, 'borrowingHistory']);
+    Route::post('/borrowings/request-borrow', [BorrowingRequestController::class, 'requestBorrow']);
+    Route::post('/borrowings/request-return/{borrowingId}', [BorrowingRequestController::class, 'requestReturn']);
+});
