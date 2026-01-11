@@ -92,6 +92,9 @@
         @role('admin')
         <a href="{{ route('roles.index') }}" class="btn btn-outline-warning btn-sm">Roles</a>
         @endrole
+        @if(auth()->user()->role == 'admin')
+    <a href="{{ route('admin.reports.index') }}" class="btn btn-outline-warning btn-sm">Reports</a>
+@endif
          @role('admin')
         <a href="{{ route('users.index') }}" class="btn btn-outline-warning btn-sm">
          <i class="bi bi-people-fill"></i> Users

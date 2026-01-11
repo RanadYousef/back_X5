@@ -60,9 +60,17 @@ Route::middleware(['auth', 'role:admin|employee'])->group(function () {
 
 });
 
-Route::group(['middleware' => ['auth', 'role:admin|employee']], function () {
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::post('/reports/generate', [ReportController::class, 'generateReport'])->name('reports.generate');
+Route::middleware(['auth' , 'role:admin'])->group(function () {
+    Route::get('/admin/reports', [ReportController::class, 'index'])
+        ->middleware('role:admin') 
+        ->name('admin.reports.index');
+
+    Route::post('/admin/reports/generate', [ReportController::class, 'generate'])
+        ->middleware('role:admin')
+        ->name('admin.reports.generate');
+        Route::get('/reports/download',[ReportController::class,'downloadPDF'])
+        ->name('admin.reports.download')
+        ->middleware('role:admin');
 });
 
 Route::get('/', function () {
