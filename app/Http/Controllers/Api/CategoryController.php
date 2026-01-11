@@ -39,7 +39,7 @@ class CategoryController extends BaseApiController
     }
 
     /**
-     *search categories by name
+     * search categories by name
      */
     public function search(SearchCategoryRequest $request)
     {
