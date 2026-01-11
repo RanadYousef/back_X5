@@ -29,5 +29,21 @@ public function category(){
    public function reviews(){
     return $this->hasMany(Review::class);
   }
+
+  /**
+     * Accessor: Returns average rating from reviews table
+     */
+    public function getAverageRatingAttribute()
+    {
+        return $this->reviews()->avg('stars') ?? 0;
+    }
+
+    /**
+     * Accessor: Returns total borrow count
+     */
+    public function getBorrowCountAttribute()
+    {
+        return $this->borrows()->count();
+    }
 }
   
