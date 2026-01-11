@@ -33,3 +33,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/reviews', [ReviewController::class, 'store']);
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
 });
+
+
+//BOOKS API ROUTES
+Route::get('/books', [BookController::class, 'index']);
+Route::get('/books/{id}', [BookController::class, 'show']);
+Route::get('/suggestions/most-borrowed', [BookController::class, 'mostBorrowed']);
+Route::get('/suggestions/top-rated', [BookController::class, 'topRated']);
