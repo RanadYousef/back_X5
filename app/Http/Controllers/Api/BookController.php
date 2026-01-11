@@ -19,7 +19,7 @@ class BookController extends BaseApiController
             $filters = $request->validated();
 
             $query = Book::with('category')
-                ->withAvg('reviews', 'stars')
+                ->withAvg('reviews', 'rating')
                 ->withCount('borrows');
 
             // Search by title
@@ -57,7 +57,7 @@ class BookController extends BaseApiController
     {
         try {
             $book = Book::with('category')
-                ->withAvg('reviews', 'stars')
+                ->withAvg('reviews', 'rating')
                 ->withCount('borrows')
                 ->findOrFail($id);
 
@@ -112,8 +112,8 @@ class BookController extends BaseApiController
     {
         try {
             $books = Book::with('category')
-                ->withAvg('reviews', 'stars')
-                ->orderBy('reviews_avg_stars', 'DESC')
+                ->withAvg('reviews', 'rating')
+                ->orderBy('reviews_avg_rating', 'DESC')
                 ->take(10)
                 ->get();
 
