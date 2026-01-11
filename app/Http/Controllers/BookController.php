@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
+use App\Http\Requests\FilterBookRequest;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Category;
 
@@ -18,10 +19,22 @@ class BookController extends Controller
     /**
      * Display a listing of books.
      */
-    public function index()
+    public function index(FilterBookRequest $request)
     {
-        $books = Book::with('category')->latest()->paginate(10);
-        return view('books.index', compact('books'));
+        $validated = $request->validated();
+        $categories = Category::all();
+        $query = Book::with('category');
+        if (!empty($validated['category_id'])) {
+            $query->where('category_id', $validated['category_id']);
+        }
+        if (!empty($validated['search'])) {
+            $query->where(function ($q) use ($validated) {
+                $q->where('title', 'LIKE', '%' . $validated['search'] . '%')
+                    ->orWhere('author', 'LIKE', '%' . $validated['search'] . '%');
+            });
+        }
+        $books = $query->latest()->paginate(10);
+        return view('books.index', compact('books', 'categories'));
     }
 
     /**
