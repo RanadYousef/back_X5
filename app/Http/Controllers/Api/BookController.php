@@ -32,7 +32,38 @@ class BookController extends BaseApiController
                 $query->where('category_id', $filters['category_id']);
             }
 
-            $books = $query->paginate(10);
+            // Filter by language
+            if (!empty($filters['language'])) {
+                $query->where('language', $filters['language']);
+            }
+
+            // Filter by publish year
+            if (!empty($filters['publish_year'])) {
+                $query->where('publish_year', $filters['publish_year']);
+            }
+
+            // Sorting
+            if (!empty($filters['sort'])) {
+
+                switch ($filters['sort']) {
+
+                    case 'rating':
+                        $query->orderBy('reviews_avg_rating', 'DESC');
+                        break;
+            
+
+                    case 'year':
+                        $query->orderBy('publish_year', 'DESC');
+                        break;
+
+                    case 'title':
+                        $query->orderBy('title', 'ASC');
+                        break;
+                }
+            }
+
+            $perPage = $filters['per_page'] ?? 10;
+            $books = $query->paginate($perPage);
 
             return $this->success(
                 BookResource::collection($books),
@@ -53,13 +84,12 @@ class BookController extends BaseApiController
     /**
      * Display a single book details.
      */
-    public function show($id)
+    public function show(Book $book)
     {
         try {
-            $book = Book::with('category')
-                ->withAvg('reviews', 'rating')
-                ->withCount('borrows')
-                ->findOrFail($id);
+            $book->load(['category']);
+            $book->loadAvg('reviews', 'rating');
+            $book->loadCount('borrows');
 
             return $this->success(
                 new BookResource($book),
@@ -68,7 +98,7 @@ class BookController extends BaseApiController
 
         } catch (\Exception $e) {
 
-            Log::error("API Book Show Error for ID $id: " . $e->getMessage());
+            Log::error("API Book Show Error for Book {$book->id}: " . $e->getMessage());
 
             return $this->error(
                 'Book not found',
