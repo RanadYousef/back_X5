@@ -8,7 +8,7 @@ use App\Http\Requests\Api\SearchCategoryRequest;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
 use Exception;
-
+use App\Http\Controllers\Api\BaseApiController;
 class CategoryController extends BaseApiController
 {
     /**
@@ -61,44 +61,29 @@ class CategoryController extends BaseApiController
     /**
      * search categories by name
      */
-    public function search(SearchCategoryRequest $request)
-    {
+  
+
+    function search(SearchCategoryRequest $request)
+    {   
         try {
-            Log::info('API: Searching category', [
-                'search_term' => $request->name
-            ]);
 
-            // Validation inside controller (extra safety)
-            $validated = validator($request->all(), [
-                'name' => ['required', 'string', 'min:2'],
-            ])->validate();
+        $validated = $request->validated();
 
-            $categories = Category::where('name', 'LIKE', '%' . $validated['name'] . '%')
-                ->withCount('books')
-                ->get();
+        Log::info('Category search request', $validated);
 
-            return $this->success($categories, 'Search results retrieved successfully');
+        $category = Category::where('name', 'like', '%' . $validated['name'] . '%')
+            ->firstOrFail();
 
-        } catch (ValidationException $e) {
+        Log::info('Category found', ['category_id' => $category->id]);
 
-            Log::warning('API: Category search validation failed', [
-                'errors' => $e->errors()
-            ]);
+        return $this->success($category, 'search successful');
 
-            return $this->error(
-                'Validation failed',
-                422,
-                $e->errors()
-            );
+    } catch (ModelNotFoundException $e) {
 
-        } catch (Exception $e) {
+        Log::warning('Category not found', $validated);
 
-            Log::error('API: Category search failed', [
-                'exception' => $e->getMessage()
-            ]);
-
-            return $this->error('Search failed');
-        }
+        return $this->error('search failed', 404);
     }
-    
+
+    }
 }
