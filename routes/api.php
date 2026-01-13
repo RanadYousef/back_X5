@@ -33,7 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 //BOOKS API ROUTES
 Route::get('/books', [BookController::class, 'index']);
-Route::get('/books/{id}', [BookController::class, 'show']);
+Route::get('/books/{book}', [BookController::class, 'show']);
 Route::get('/suggestions/most-borrowed', [BookController::class, 'mostBorrowed']);
 Route::get('/suggestions/top-rated', [BookController::class, 'topRated']);
 
