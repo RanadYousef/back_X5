@@ -28,11 +28,21 @@ class BorrowingRequestController extends BaseApiController
                 ->where('user_id', Auth::id())
                 ->where('status', 'borrowed')
                 ->latest()
-                ->get();
+                ->get()
+                ->map(function ($borrow) {
+                    return [
+                        'id' => $borrow->id,
+                        'book_title' => $borrow->book->title,
+                        'borrowed_at' => $borrow->borrowed_at->format('Y-m-d'),
+                        'due_date' => $borrow->due_date ? $borrow->due_date->format('Y-m-d') : null,
+                        'days_left' => $borrow->due_date ? (int) now()->diffInDays($borrow->due_date, false) : null,
+                        'is_overdue' => $borrow->due_date ? now()->gt($borrow->due_date) : false,
+                    ];
+                });
 
             return $this->success($borrowings, 'Current active borrowings retrieved successfully');
         } catch (Exception $e) {
-            Log::error('Error fetching current borrowings: ' . $e->getMessage(), ['user_id' => Auth::id()]);
+            Log::error('Error fetching current borrowings: ' . $e->getMessage());
             return $this->error('Failed to retrieve current borrowings', 500);
         }
     }
@@ -51,26 +61,34 @@ class BorrowingRequestController extends BaseApiController
 
             return $this->success($history, 'Borrowing history retrieved successfully');
         } catch (Exception $e) {
-            Log::error('Error fetching borrowing history: ' . $e->getMessage(), ['user_id' => Auth::id()]);
+            Log::error('Error fetching borrowing history: ' . $e->getMessage());
             return $this->error('Failed to retrieve history', 500);
         }
     }
 
     /**
      * Submit a new request to borrow a physical book.
-     * * @param StoreBorrowingRequest $request
      */
     public function requestBorrow(StoreBorrowingRequest $request)
     {
         return DB::transaction(function () use ($request) {
             try {
                 $validated = $request->validated();
+                $userId = Auth::id();
 
+                $alreadyBorrowed = Borrowing::where('user_id', $userId)
+                    ->where('book_id', $validated['book_id'])
+                    ->where('status', 'borrowed')
+                    ->exists();
 
-                // Prevent duplicate pending borrow requests for the same book
-                $pending = BorrowingRequest::where('user_id', Auth::id())
+                if ($alreadyBorrowed) {
+                    return $this->error('You already have this book in your possession', 400);
+                }
+
+                $pending = BorrowingRequest::where('user_id', $userId)
                     ->where('book_id', $validated['book_id'])
                     ->where('request_type', 'borrow')
+                    ->where('status', 'pending')
                     ->exists();
 
                 if ($pending) {
@@ -78,36 +96,36 @@ class BorrowingRequestController extends BaseApiController
                 }
 
                 $borrowRequest = BorrowingRequest::create([
-                    'user_id' => Auth::id(),
+                    'user_id' => $userId,
                     'book_id' => $validated['book_id'],
-                    'request_type' => 'borrow'
+                    'request_type' => 'borrow',
+                    'status' => 'pending'
                 ]);
 
-                return $this->success($borrowRequest, 'Borrow request submitted. Please wait for staff approval.', 201);
+                return $this->success($borrowRequest, 'Borrow request submitted successfully', 201);
             } catch (Exception $e) {
-                Log::error('Borrow Request Creation Failed: ' . $e->getMessage());
-                return $this->error('An error occurred while submitting the borrow request', 500);
+                Log::error('Borrow Request Failed: ' . $e->getMessage());
+                return $this->error('Failed to submit borrow request', 500);
             }
         });
     }
 
     /**
      * Submit a request to return a borrowed book.
-     * * @param int $borrowingId
      */
     public function requestReturn(ReturnBookRequest $request)
     {
         $data = $request->validated();
         return DB::transaction(function () use ($data) {
             try {
-                // Verify the user actually owns this active borrowing record
                 $borrowing = Borrowing::where('user_id', Auth::id())
                     ->where('status', 'borrowed')
+                    ->lockForUpdate()
                     ->findOrFail($data['borrowing_id']);
 
-                // Prevent duplicate return requests
                 $pendingReturn = BorrowingRequest::where('borrowing_id', $data['borrowing_id'])
                     ->where('request_type', 'return')
+                    ->where('status', 'pending')
                     ->exists();
 
                 if ($pendingReturn) {
@@ -118,14 +136,33 @@ class BorrowingRequestController extends BaseApiController
                     'user_id' => Auth::id(),
                     'book_id' => $borrowing->book_id,
                     'borrowing_id' => $data['borrowing_id'],
-                    'request_type' => 'return'
+                    'request_type' => 'return',
+                    'status' => 'pending',
                 ]);
 
-                return $this->success($returnRequest, 'Return request submitted. Please hand over the book to the staff.');
+                return $this->success($returnRequest, 'Return request submitted. Please return the book to the library.');
             } catch (Exception $e) {
-                Log::error('Return Request Creation Failed: ' . $e->getMessage());
-                return $this->error('Borrowing record not found or already returned', 404);
+                Log::error('Return Request Failed: ' . $e->getMessage());
+                return $this->error('Invalid borrowing record or request already exists', 404);
             }
         });
+    }
+
+    /**
+     * Get the status of all requests (Borrow/Return) for the authenticated user.
+     */
+    public function requestStatus()
+    {
+        try {
+            $requests = BorrowingRequest::with('book')
+                ->where('user_id', Auth::id())
+                ->latest()
+                ->get();
+
+            return $this->success($requests, 'Request status history retrieved successfully');
+        } catch (Exception $e) {
+            Log::error('Error fetching request status: ' . $e->getMessage());
+            return $this->error('Internal Server Error', 500);
+        }
     }
 }

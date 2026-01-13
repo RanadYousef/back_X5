@@ -3,7 +3,7 @@
 /**
  * Main Web Routes Configuration
  * This file contains all the routes for the application including
- * Authentication, Book Management, Role/Permission Management, and Reporting.
+ * Authentication, Book Management,categoryManagement,userManagement, Role/Permission Management,reviews and Reporting.
  */
 
 use App\Http\Controllers\ProfileController;
@@ -23,6 +23,10 @@ use App\Http\Controllers\BorrowingController;
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::resource('roles', RolePermissionController::class);
+    Route::resource('users', UserManagementController::class);
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::post('/reports/generate', [ReportController::class, 'generateReport'])->name('reports.generate');
 });
 
 
@@ -39,47 +43,35 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth', 'role:admin|employee'])->group(function () {
 
-    // Book Management Routes
     Route::resource('books', BookController::class);
 
-    // View all borrowing operations
-    Route::get('borrowings', [BorrowingController::class, 'index'])
-        ->name('borrowings.index');
-    // Show the form to create a borrowing operation
-    Route::get('borrowings/create', [BorrowingController::class, 'create'])
-        ->name('borrowings.create');
-    // Execute a book borrowing operation
-    Route::post('borrowings', [BorrowingController::class, 'store'])
-        ->name('borrowings.store');
-    // Return a borrowed book
-    Route::patch('borrowings/{borrowing}/return', [BorrowingController::class, 'returnBook'])
-        ->name('borrowings.return');
+    Route::get('/borrowings', [BorrowingController::class, 'index'])->name('borrowings.index');
+    Route::get('/borrowings/history', [BorrowingController::class, 'history'])->name('borrowings.history');
+    Route::patch('/reviews/{review}/approve', [ReviewController::class, 'approve'])
+        ->name('reviews.approve');
+    Route::get('/reviews', [ReviewController::class, 'index'])
+        ->name('reviews.index');
+
+    Route::patch('/reviews/{review}/reject', [ReviewController::class, 'reject'])
+        ->name('reviews.reject');
+
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])
+        ->name('reviews.destroy');
+
+
+    Route::post('/borrowings/approve/{borrowRequest}', [BorrowingController::class, 'approve'])->name('borrowings.approve');
+    Route::post('/borrowings/reject/{borrowRequest}', [BorrowingController::class, 'reject'])->name('borrowings.reject');
+
     Route::get('/categories/trash', [CategoryController::class, 'trash'])->name('categories.trash');
     Route::post('/categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
     Route::delete('/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.forceDelete');
 
 });
 
-Route::group(['middleware' => ['auth', 'role:admin|employee']], function () {
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::post('/reports/generate', [ReportController::class, 'generateReport'])->name('reports.generate');
-});
 
 Route::get('/', function () {
     return view('welcome');
 });
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::resource('users', UserManagementController::class);
-});
-
-// Role & Permission Routes
-// Managed by Admin only
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::resource('roles', RolePermissionController::class);
-});
-
-// Category Management Routes
-// 'index' and 'show' are excluded because they are public for guests and subscribers
 Route::middleware(['auth', 'permission:manage categories'])->group(function () {
     Route::resource('categories', CategoryController::class)->except(['index', 'show']);
 });
@@ -97,18 +89,6 @@ Route::middleware(['auth', 'role:admin|employee'])->group(function () {
         ->name('reviews.index');
 });
 
-// Review Management ( Employee)
-Route::middleware(['auth', 'role:employee'])->group(function () {
-
-    Route::patch('/reviews/{review}/approve', [ReviewController::class, 'approve'])
-        ->name('reviews.approve');
-
-    Route::patch('/reviews/{review}/reject', [ReviewController::class, 'reject'])
-        ->name('reviews.reject');
-
-    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])
-        ->name('reviews.destroy');
-});
 
 
 require __DIR__ . '/auth.php';
