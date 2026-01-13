@@ -2,106 +2,100 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Borrowing;
 use App\Models\Book;
-use App\Http\Requests\StoreBorrowingRequest;
+use App\Models\Borrowing;
+use App\Models\BorrowingRequest;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 
-/**
- * Class BorrowingController
- *
- * Handles book borrowing and returning operations.
- */
 class BorrowingController extends Controller
 {
     /**
-     * Display a listing of borrowings.
-     *
-     * @return \Illuminate\View\View
+     * Display borrowing management dashboard.
      */
     public function index()
     {
-        $borrowings = Borrowing::with(['book', 'user'])->latest()->get();
-        return view('borrowings.index', compact('borrowings'));
+        // Only fetch requests that actually need staff action
+        $pendingRequests = BorrowingRequest::with(['book', 'user'])
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+        return view('borrowings.index', compact('pendingRequests'));
+    }
+    public function history()
+    {
+        $borrowings = Borrowing::with(['book', 'user'])
+            ->latest()
+            ->get();
+        return view('borrowings.history', compact('borrowings'));
     }
 
     /**
-     * Show the form for creating a new borrowing.
-     *
-     * @return \Illuminate\View\View
+     * Approve borrow or return request.
      */
-    public function create()
+    public function approve(BorrowingRequest $borrowRequest)
     {
-        $books = Book::where('copies_number', '>', 0)->get();
-        return view('borrowings.create', compact('books'));
-    }
-
-    /**
-     * Store a newly created borrowing in storage.
-     *
-     * @param StoreBorrowingRequest $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function store(StoreBorrowingRequest $request)
-    {
-        $data = $request->validated();
-
         try {
-            DB::transaction(function () use ($data) {
+            return DB::transaction(function () use ($borrowRequest) {
+                // Lock the book record to prevent stock inconsistencies 
+                $book = $borrowRequest->book()->lockForUpdate()->first();
 
-                $book = Book::lockForUpdate()->findOrFail($data['book_id']);
+                if ($borrowRequest->request_type === 'borrow') {
+                    // Double-check stock before final approval
+                    if ($book->copies_number <= 0) {
+                        return back()->with('error', 'Critical: Book is now out of stock.');
+                    }
 
-                if ($book->copies_number < 1) {
-                    throw new \Exception('Book not available.');
+                    Borrowing::create([
+                        'user_id' => $borrowRequest->user_id,
+                        'book_id' => $borrowRequest->book_id,
+                        'borrowed_at' => now(),
+                        'due_date' => now()->addDays(25),
+                        'status' => 'borrowed',
+                    ]);
+
+                    $book->decrement('copies_number');
+
+                } elseif ($borrowRequest->request_type === 'return') {
+                    // Find the specific borrowing record linked to this request
+                    $borrowing = Borrowing::where('id', $borrowRequest->borrowing_id)
+                        ->where('status', 'borrowed')
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (!$borrowing) {
+                        return back()->with('error', 'Borrowing record not found or already processed.');
+                    }
+
+                    $borrowing->update([
+                        'status' => 'returned',
+                        'returned_at' => now(),
+                    ]);
+
+                    $book->increment('copies_number');
                 }
 
-                Borrowing::create([
-                    'book_id' => $book->id,
-                    'user_id' => Auth::id(),
-                    'borrowed_at' => now(),
-                    'status' => 'borrowed',
-                ]);
+                // Update request status 
+                $borrowRequest->update(['status' => 'approved']);
 
-                $book->decrement('copies_number');
+                return back()->with('success', 'Request approved and processed successfully.');
             });
 
-            return redirect()->route('borrowings.index')
-                ->with('success', 'Book borrowed successfully.');
-
         } catch (\Exception $e) {
-            return back()->with('error', 'Borrowing operation failed.');
+            Log::error('Borrowing approval error: ' . $e->getMessage());
+            return back()->with('error', 'An internal error occurred during approval.');
         }
     }
 
     /**
-     * Return a borrowed book.
-     *
-     * @param Borrowing $borrowing
-     * @return \Illuminate\Http\RedirectResponse
+     * Reject a borrow or return request.
      */
-    public function returnBook(Borrowing $borrowing)
+    public function reject(BorrowingRequest $borrowRequest)
     {
-        try {
-            if ($borrowing->status === 'returned') {
-                return back()->with('error', 'This book has already been returned.');
-            }
+        $borrowRequest->update(['status' => 'rejected']);
 
-            DB::transaction(function () use ($borrowing) {
-
-                $borrowing->update([
-                    'status' => 'returned',
-                    'returned_at' => now(),
-                ]);
-                $book = $borrowing->book()->lockForUpdate()->first();
-                $book->increment('copies_number');
-            });
-
-            return redirect()->route('borrowings.index')
-                ->with('success', 'Book returned successfully.');
-
-        } catch (\Exception $e) {
-            return back()->with('error', 'Return operation failed.');
-        }
+        return back()->with('success', 'Request has been rejected.');
     }
+
 }
