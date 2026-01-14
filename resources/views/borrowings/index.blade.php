@@ -74,7 +74,7 @@
                                     @endphp
 
                                     @if($canApprove)
-                                        <form action="{{ route('admin.borrowings.approve', $request->id) }}" method="POST">
+                                        <form action="{{ route('borrowings.approve', $request->id) }}" method="POST">
                                             @csrf
                                             <button type="submit" class="btn btn-outline-success btn-sm px-3 shadow-sm hover-grow">
                                                 Approve
@@ -86,7 +86,7 @@
                                         </button>
                                     @endif
 
-                                    <form action="{{ route('admin.borrowings.reject', $request->id) }}" method="POST">
+                                    <form action="{{ route('borrowings.reject', $request->id) }}" method="POST">
                                         @csrf
                                         <button type="submit" class="btn btn-outline-danger btn-sm px-3 shadow-sm hover-grow">
                                             Reject
