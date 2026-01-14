@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
-use App\Http\Requests\FilterBookRequest;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Category;
 
@@ -19,22 +18,10 @@ class BookController extends Controller
     /**
      * Display a listing of books.
      */
-    public function index(FilterBookRequest $request)
+    public function index()
     {
-        $validated = $request->validated();
-        $categories = Category::all();
-        $query = Book::with('category');
-        if (!empty($validated['category_id'])) {
-            $query->where('category_id', $validated['category_id']);
-        }
-        if (!empty($validated['search'])) {
-            $query->where(function ($q) use ($validated) {
-                $q->where('title', 'LIKE', '%' . $validated['search'] . '%')
-                    ->orWhere('author', 'LIKE', '%' . $validated['search'] . '%');
-            });
-        }
-        $books = $query->latest()->paginate(10);
-        return view('books.index', compact('books', 'categories'));
+        $books = Book::with('category')->latest()->paginate(10);
+        return view('books.index', compact('books'));
     }
 
     /**
@@ -115,11 +102,7 @@ class BookController extends Controller
     public function destroy(Book $book)
     {
         try {
-
-            if ($book->cover_image && Storage::disk('public')->exists($book->cover_image)) {
-                Storage::disk('public')->delete($book->cover_image);
-            }
-
+            
             $book->delete();
 
             return redirect()->route('books.index')
@@ -129,4 +112,41 @@ class BookController extends Controller
             return back()->with('error', 'Delete failed.');
         }
     }
+    /**
+     * Display trashed books.
+     */
+    public function trashed()
+    {
+        $books = Book::onlyTrashed()->with('category')->paginate(10);
+        return view('books.trashed', compact('books'));
+    }
+
+    /**
+     * Restore a trashed book.
+     */
+    public function restore($id)
+    {
+        $book = Book::onlyTrashed()->findOrFail($id);
+        $book->restore();
+
+        return redirect()->route('books.trashed')
+             ->with('success', 'Book restored successfully.');
+    }
+
+    /**
+     * Permanently delete a book.
+     */
+    public function forceDelete($id)
+    {
+        $book = Book::onlyTrashed()->findOrFail($id);
+
+        if ($book->cover_image && Storage::disk('public')->exists($book->cover_image)) {
+            Storage::disk('public')->delete($book->cover_image);
+        }
+
+        $book->forceDelete();
+
+        return redirect()->route('books.trashed')
+            ->with('success', 'Book permanently deleted.');
+        }
 }

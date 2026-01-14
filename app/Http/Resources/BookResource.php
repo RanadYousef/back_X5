@@ -20,14 +20,16 @@ class BookResource extends JsonResource
             'cover_image'    => $this->cover_image ? asset('storage/'.$this->cover_image) : null,
 
             // Relations.
-            'category' => [
-                'id'   => $this->category->id,
-                'name' => $this->category->name,
-            ],
+            'category' => $this->whenLoaded('category', function () {
+                return [
+                    'id'   => $this->category->id,
+                    'name' => $this->category->name,
+                ];
+            }),
 
             // These come from withCount() and withAvg()
             'borrows_count'  => $this->borrows_count ?? 0,
-            'average_rating' => round($this->reviews_avg_stars ?? 0, 1),
+            'average_rating' => round($this->reviews_avg_rating ?? 0, 1),
         ];
     }
 }

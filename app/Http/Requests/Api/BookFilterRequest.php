@@ -16,6 +16,10 @@ class BookFilterRequest extends FormRequest
         return [
             'search'      => 'nullable|string|max:255',
             'category_id' => 'nullable|exists:categories,id',
+            'language' => 'nullable|string|max:50',
+            'publish_year' => 'nullable|integer|min:1000|max:' . date('Y'),
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'sort' => 'nullable|in:rating,year,title',
         ];
     }
 }

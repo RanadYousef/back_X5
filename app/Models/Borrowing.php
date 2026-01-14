@@ -13,6 +13,7 @@ class Borrowing extends Model
         'user_id',
         'book_id',
         'borrowed_at',
+        'due_date',
         'returned_at',
         'status',
     ];
@@ -23,6 +24,7 @@ class Borrowing extends Model
     protected $casts = [
         'borrowed_at' => 'datetime',
         'returned_at' => 'datetime',
+        'due_date' => 'datetime',
     ];
 
 

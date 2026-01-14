@@ -12,38 +12,7 @@
             <i class="bi bi-plus-circle"></i> Add Book
         </a>
     </div>
-<form action="{{ route('books.index') }}" method="GET" id="filterForm" class="mb-4">
-        <div class="row g-3">
-            <div class="col-md-5">
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent text-warning border-warning">
-                        <i class="bi bi-search"></i>
-                    </span>
-                    <input type="text" name="search" class="form-control bg-dark text-white border-warning" 
-                           placeholder="Search by title or author..." value="{{ request('search') }}">
-                    <button class="btn btn-outline-warning" type="submit">Search</button>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent text-warning border-warning">
-                        <i class="bi bi-filter"></i>
-                    </span>
-                    <select name="category_id" class="form-select bg-dark text-white border-warning" onchange="this.form.submit()">
-                        <option value="">All Categories</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <a href="{{ route('books.index') }}" class="btn btn-outline-secondary w-100">Clear</a>
-            </div>
-        </div>
-    </form>
+
     <div class="table-responsive">
         <table class="table table-dark-custom table-hover align-middle text-center">
             <thead>
@@ -136,9 +105,6 @@
     </div>
 
 </div>
-<div class="mt-4 d-flex justify-content-center">
-        {{ $books->appends(request()->query())->links() }}
-    </div>
 
 {{-- Tooltip Activation --}}
 <script>

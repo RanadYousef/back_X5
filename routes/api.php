@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BorrowingRequestController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\BookController;
+use App\Http\Controllers\Api\CategoryController;
 
 
 Route::get('/user', function (Request $request) {
@@ -35,8 +36,15 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
+
 //BOOKS API ROUTES
 Route::get('/books', [BookController::class, 'index']);
-Route::get('/books/{id}', [BookController::class, 'show']);
+Route::get('/books/{book}', [BookController::class, 'show']);
 Route::get('/suggestions/most-borrowed', [BookController::class, 'mostBorrowed']);
 Route::get('/suggestions/top-rated', [BookController::class, 'topRated']);
+
+
+// categories routes
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{category}/books', [CategoryController::class, 'books']);
+Route::post('/categories/search', [CategoryController::class, 'search']);
