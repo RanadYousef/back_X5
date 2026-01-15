@@ -54,6 +54,17 @@ Route::middleware(['auth', 'role:admin|employee'])->group(function () {
     Route::post('/categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
     Route::delete('/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.forceDelete');
 });
+
+Route::middleware(['auth' , 'role:admin'])->group(function () {
+    Route::get('/reports', [ReportController::class, 'index']) 
+        ->name('reports.index');
+
+    Route::post('/reports/generate', [ReportController::class, 'generateReport'])
+        ->name('reports.generate');
+        Route::post('/reports/download',[ReportController::class,'downloadPDF'])
+        ->name('reports.pdf')
+        ->middleware('role:admin');
+});
 Route::group(['middleware' => ['auth', 'role:admin|employee']], function () {
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
@@ -61,6 +72,7 @@ Route::group(['middleware' => ['auth', 'role:admin|employee']], function () {
     Route::post('/reports/generate', [ReportController::class, 'generateReport'])->name('reports.generate');
 
 });
+
 Route::get('/', function () {
 
     return view('welcome');

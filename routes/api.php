@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BorrowingRequestController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\CategoryController;
 
@@ -27,6 +28,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/borrowings/history', [BorrowingRequestController::class, 'borrowingHistory']);
     Route::post('/borrowings/request-borrow', [BorrowingRequestController::class, 'requestBorrow']);
     Route::post('/borrowings/request-return/{borrowingId}', [BorrowingRequestController::class, 'requestReturn']);
+});
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/my-reviews', [ReviewController::class, 'myReviews']);
+    Route::post('/reviews/{book}', [ReviewController::class, 'store']);
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy']);
 });
 
 
