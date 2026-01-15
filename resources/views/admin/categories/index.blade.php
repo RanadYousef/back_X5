@@ -16,6 +16,38 @@
             </a>
         @endcan
     </div>
+    
+    <form method="GET" action="{{ route('categories.index') }}" class="mb-4">
+    <div class="row g-2">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-dark text-warning border-secondary">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text"
+                       name="search"
+                       value="{{ request('search') }}"
+                       class="form-control bg-dark text-white border-secondary"
+                       placeholder="Search category by name...">
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <button class="btn btn-outline-warning w-100">
+                Search
+            </button>
+        </div>
+
+        <div class="col-md-2">
+            <a href="{{ route('categories.index') }}" class="btn btn-outline-secondary w-100">
+                Clear
+            </a>
+            </div>
+        </div>
+    </form>
+
+
+
 
     @if(session('success'))
         <div class="alert alert-success bg-success text-white border-0 shadow-sm mb-4">
