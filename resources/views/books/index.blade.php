@@ -11,10 +11,14 @@
         <a href="{{ route('books.create') }}" class="btn btn-3d">
             <i class="bi bi-plus-circle"></i> Add Book
         </a>
+        <a href="{{ route('books.trashed') }}" class="btn btn-outline-danger">
+            <i class="bi bi-trash"></i> Trash
+        </a>
+
     </div>
 
     <div class="table-responsive">
-        <table class="table table-dark-custom table-hover align-middle text-center">
+        <table class="table table-dark table-dark-custom table-hover align-middle text-center">
             <thead>
                 <tr class="text-warning">
                     <th>Cover</th>
