@@ -19,23 +19,17 @@ class ReportController extends Controller
      */
     public function index()
     {
-        if (auth()->user()->role !=='admin') {
-            abort(403,'For Admin Only');
-        }
+    
         return view('reports.index');
     }
     public function
         generateReport(
         ReportRequest $request
     ) { 
-        if (auth()->user()->role !=='admin') {
-            abort(403,'For Admin Only');
-        }
+        $validated = $request->validated();
+        $start = $validated['start_date'];
+        $end = $validated['end_date'];
         try {
-            $validated = $request->validated();
-
-            $start = $validated['start_date'];
-            $end = $validated['end_date'];
             /**
              * book rating report, top and lowest rated books, and average rating
              */
@@ -77,6 +71,7 @@ class ReportController extends Controller
                     $q->whereBetween('created_at', [$start, $end]);
                 }
             ])->orderBy('borrowings_count', 'desc')->take(5)->get();
+            Log::info("Admin generated a report from $start to $end");
 
             return view('reports.show', compact(
                 'reports',
@@ -88,7 +83,9 @@ class ReportController extends Controller
                 'avgBorrowingCount',
                 'activeBorrowings',
                 'availableBooks',
-                'topCustomers'
+                'topCustomers',
+                'start',
+                'end'
             ));
 
         } catch (\Exception $e) {
@@ -96,14 +93,13 @@ class ReportController extends Controller
             return back()->withErrors(['error' => 'حدث خطأ أثناء تحليل البيانات.']);
         }
     }
-public function downloadPDF(Request $request)
+public function downloadPDF(ReportRequest $request)
 {
-    if (auth()->user()->role !== 'admin') {
-        abort(403, 'For Admin Only');
-    }
+    $validated = $request->validated();
+    try {
 
-    $query = \App\Models\Borrowing::with(['book', 'user'])
-        ->whereBetween('borrowed_at', [$request->start_date, $request->end_date]);
+    $query = Borrowing::with(['book', 'user'])
+        ->whereBetween('created_at', [$validated['start_date'],$validated['end_date']]);
 
     if ($request->category_id) {
         $query->whereHas('book', function($q) use ($request) {
@@ -112,8 +108,9 @@ public function downloadPDF(Request $request)
     }
 
     $borrowings = $query->get();
+    Log::info("Admin downloaded PDF report");
     
-    $pdf = Pdf::loadView('admin.reports.show', [
+    $pdf = Pdf::loadView('reports.show', [
         'borrowings' => $borrowings,
         'request' => $request,
         'totalBorrowings' => $borrowings->count(),
@@ -121,5 +118,9 @@ public function downloadPDF(Request $request)
     ]);
 
     return $pdf->download('Library-Report.pdf');
+} catch (Exception $e) {
+    Log::error('PDF Export Error: ' . $e->getMessage());
+    return back()->withErrors(['error' => 'فشل توليد ملف PDF.']);
+}
 }
 }
