@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('language');
             $table->unsignedInteger('copies_number');                        
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
