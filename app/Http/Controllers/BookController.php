@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Category;
 
@@ -18,12 +19,33 @@ class BookController extends Controller
     /**
      * Display a listing of books.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $books = Book::with('category')->latest()->paginate(10);
-        return view('books.index', compact('books'));
-    }
+        // Fetch all categories for the filter dropdown
+        $categories = Category::all();
 
+        // Start the query with the category relationship
+        $query = Book::with('category');
+
+        // 1. Filter by Category if selected
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // 2. Search by Title or Author if search term is provided
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'LIKE', '%' . $searchTerm . '%')
+                    ->orWhere('author', 'LIKE', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Execute query with pagination and keep the search filters in links
+        $books = $query->latest()->paginate(10)->withQueryString();
+
+        return view('books.index', compact('books', 'categories'));
+    }
     /**
      * Show the form for creating a new book.
      */
@@ -102,7 +124,7 @@ class BookController extends Controller
     public function destroy(Book $book)
     {
         try {
-            
+
             $book->delete();
 
             return redirect()->route('books.index')
@@ -130,7 +152,7 @@ class BookController extends Controller
         $book->restore();
 
         return redirect()->route('books.trashed')
-             ->with('success', 'Book restored successfully.');
+            ->with('success', 'Book restored successfully.');
     }
 
     /**
@@ -148,5 +170,5 @@ class BookController extends Controller
 
         return redirect()->route('books.trashed')
             ->with('success', 'Book permanently deleted.');
-        }
+    }
 }

@@ -92,10 +92,10 @@
         @role('admin')
         <a href="{{ route('roles.index') }}" class="btn btn-outline-warning btn-sm">Roles</a>
         @endrole
-        @if(auth()->user()->role == 'admin')
-    <a href="{{ route('admin.reports.index') }}" class="btn btn-outline-warning btn-sm">Reports</a>
-@endif
-         @role('admin')
+        @role('admin')
+    <a href="{{ route('reports.index') }}" class="btn btn-outline-warning btn-sm">Reports</a>
+@endrole         
+@role('admin')
         <a href="{{ route('users.index') }}" class="btn btn-outline-warning btn-sm">
          <i class="bi bi-people-fill"></i> Users
         </a>
