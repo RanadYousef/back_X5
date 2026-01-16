@@ -15,13 +15,17 @@ class CategoryController extends Controller
      * Display a listing of the categories with book counts.
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Fetch only the ID and Name
-        $categories = Category::select('id', 'name')
-            ->withCount('books') // Retrieve the total count of books only     
-            ->latest()
-            ->get();
+        $query = Category::select('id', 'name')
+            ->withCount('books');
+
+        // Search by category name
+        if ($request->filled('search')) {
+            $query->where('name', 'LIKE', '%' . $request->search . '%');
+        }
+
+        $categories = $query->latest()->get();
 
         return view('admin.categories.index', compact('categories'));
     }

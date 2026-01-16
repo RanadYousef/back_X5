@@ -43,6 +43,11 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth', 'role:admin|employee'])->group(function () {
     // Book Management Routes
     Route::resource('books', BookController::class);
+    Route::prefix('books')->group(function () {   
+        Route::get('books/trashed', [BookController::class, 'trashed'])->name('books.trashed');
+        Route::post('books/{id}/restore', [BookController::class, 'restore'])->name('books.restore');
+        Route::delete('books/{id}/force-delete', [BookController::class, 'forceDelete'])->name('books.forceDelete');
+    });
     Route::get('/borrowings', [BorrowingController::class, 'index'])->name('borrowings.index');
     Route::get('/borrowings/history', [BorrowingController::class, 'history'])->name('borrowings.history');
     // عمليات الموافقة والرفض
