@@ -55,6 +55,28 @@ Route::middleware(['auth', 'role:admin|employee'])->group(function () {
     Route::post('/borrowings/approve/{borrowRequest}', [BorrowingController::class, 'approve'])->name('borrowings.approve');
     Route::post('/borrowings/reject/{borrowRequest}', [BorrowingController::class, 'reject'])->name('borrowings.reject');
 
+    Route::prefix('books')->group(function () {   
+        Route::get('books/trashed', [BookController::class, 'trashed'])->name('books.trashed');
+        Route::post('books/{id}/restore', [BookController::class, 'restore'])->name('books.restore');
+        Route::delete('books/{id}/force-delete', [BookController::class, 'forceDelete'])->name('books.forceDelete');
+    });
+    
+    // View all borrowing operations
+    Route::get('borrowings', [BorrowingController::class, 'index'])
+        ->name('borrowings.index');
+    // Show the form to create a borrowing operation
+    Route::get('borrowings/create', [BorrowingController::class, 'create'])
+        ->name('borrowings.create');
+    // Execute a book borrowing operation
+    Route::post('borrowings', [BorrowingController::class, 'store'])
+        ->name('borrowings.store');
+    // Return a borrowed book
+    Route::patch('borrowings/{borrowing}/return', [BorrowingController::class, 'returnBook'])
+        ->name('borrowings.return');
+    Route::post('/borrowings/approve/{borrowRequest}', [BorrowingController::class, 'approve'])->name('borrowings.approve');
+    Route::post('/borrowings/reject/{borrowRequest}', [BorrowingController::class, 'reject'])->name('borrowings.reject');
+    
+    // Category Management
     Route::get('/categories/trash', [CategoryController::class, 'trash'])->name('categories.trash');
     Route::post('/categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
     Route::delete('/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.forceDelete');
@@ -143,6 +165,19 @@ Route::middleware(['auth', 'role:employee'])->group(function () {
         ->name('reviews.destroy');
 
 });
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('users', UserManagementController::class);
+
+Route::patch('users/{id}/restore',
+    [UserManagementController::class, 'restore']
+)->name('users.restore');
+
+Route::delete('users/{id}/force-delete',
+    [UserManagementController::class, 'forceDelete']
+)->name('users.forceDelete');
+});
+
 require __DIR__ . '/auth.php';
 
 
