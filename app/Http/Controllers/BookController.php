@@ -21,18 +21,14 @@ class BookController extends Controller
      */
     public function index(Request $request)
     {
-        // Fetch all categories for the filter dropdown
         $categories = Category::all();
 
-        // Start the query with the category relationship
         $query = Book::with('category');
 
-        // 1. Filter by Category if selected
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 
-        // 2. Search by Title or Author if search term is provided
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
@@ -41,7 +37,6 @@ class BookController extends Controller
             });
         }
 
-        // Execute query with pagination and keep the search filters in links
         $books = $query->latest()->paginate(10)->withQueryString();
 
         return view('books.index', compact('books', 'categories'));
