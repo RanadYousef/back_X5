@@ -37,6 +37,7 @@ class ReportController extends Controller
         $end = $validated['end_date'];
 
         try {
+<<<<<<< Updated upstream
             $baseBookQuery = Book::query();
 
             // Calculate Top Rated Books using dynamic average rating (Virtual Field)
@@ -88,6 +89,44 @@ class ReportController extends Controller
             })->get();
 
             // Identify top customers based on their total borrowing count
+=======
+            /**
+             * book rating report, top and lowest rated books, and average rating
+             */
+            $reports = Borrowing::with(['user', 'book'])->whereBetween('created_at', [$start, $end])
+                ->get();
+        
+            $topRatedBooks = Book::orderBy('overall_rating', 'desc')->take(5)->get();
+            $lowestRatedBooks = Book::orderBy('overall_rating', 'asc')->take(5)->get();
+            $avgRating = Book::avg('overall_rating');
+            /**
+             * most and least borrowed books, and average borrowing rate
+             */
+            $totalBorrowings = $reports->count();
+            $mostBorrowed = Book::withCount([
+                'borrowings' => function ($q) use ($start, $end) {
+                    $q->whereBetween('created_at', [$start, $end]);
+                }
+            ])->orderBy('borrowings_count', 'desc')->take(5)->get();
+            $leastBorrowed = Book::withCount([
+                'borrowings' => function ($q) use ($start, $end) {
+                    $q->whereBetween('created_at', [$start, $end]);
+                }
+            ])->orderBy('borrowings_count', 'asc')->take(5)->get();
+            $avgBorrowingCount = $reports->count() / max(Book::count(), 1);
+            /**
+             * active borrowings , and available books
+             */
+            $activeBorrowings = Borrowing::whereNull('returned_at')
+                ->whereBetween('created_at', [$start, $end])
+                ->count();
+            $availableBooks = Book::whereDoesntHave('borrowings', function ($q) {
+                $q->whereNull('returned_at');
+            })->count ();
+            /**
+             * top customers (most borrowed)
+             */
+>>>>>>> Stashed changes
             $topCustomers = User::withCount([
                 'borrowings' => function ($q) use ($start, $end) {
                     $q->whereBetween('created_at', [$start, $end]);
