@@ -14,20 +14,20 @@ use Illuminate\Http\Request;
 
 class ReviewController extends BaseApiController
 {
-   /**
-    * Undocumented function
-    *display reviews
-    * @return void
-    */
+    /**
+     * Undocumented function
+     *display reviews
+     * @return void
+     */
     public function myReviews()
     {
         try {
-        $reviews = Review::with('book')
-            ->where('user_id', auth()->id())
-            ->latest()
-            ->get();
+            $reviews = Review::with('book')
+                ->where('user_id', auth()->id())
+                ->latest()
+                ->get();
 
-        return $this->success($reviews,'your reviews retrieved successfully');
+            return $this->success($reviews, 'your reviews retrieved successfully');
         } catch (\Exception $e) {
             Log::error('Error fetching reviews: ' . $e->getMessage(), ['user_id' => auth()->id]);
             return $this->error('Failed to retrieve reviews', 500);
@@ -43,23 +43,24 @@ class ReviewController extends BaseApiController
     public function store(StoreReviewRequest $request, Book $book)
     {
         $validated = $request->validated();
-        DB::beginTransaction(); 
+        DB::beginTransaction();
         try {
-        
+
             $review = Review::create([
                 'user_id' => auth()->id(),
-                'book_id' => $book->id,
-                'rating'  => $validated['rating'], 
-                'comment' => $validated['comment'], 
+                'book_id' => $validated['book_id'],
+                'rating' => $validated['rating'],
+                'status' => 'pending',
+                'comment' => $validated['comment'],
             ]);
 
             DB::commit();
-            return $this->success($review,'Review added successfully',201);
+            return $this->success($review, 'Review added successfully', 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error storing review: ' . $e->getMessage(),['book_id' => $book->id]);
-            return $this->error('Failed to add review', 500,);
+            Log::error('Error storing review: ' . $e->getMessage(), ['book_id' => $book->id]);
+            return $this->error('Failed to add review', 500, );
         }
     }
 
@@ -72,7 +73,7 @@ class ReviewController extends BaseApiController
     public function destroy(Review $review)
     {
         try {
-            if ($review->user_id !==auth()->id()) {
+            if ($review->user_id !== auth()->id()) {
                 return $this->error('Unauthorized to delete this review', 403);
             }
 
