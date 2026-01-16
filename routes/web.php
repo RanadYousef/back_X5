@@ -66,9 +66,7 @@ Route::middleware(['auth' , 'role:admin'])->group(function () {
 
     Route::post('/reports/generate', [ReportController::class, 'generateReport'])
         ->name('reports.generate');
-        Route::post('/reports/download',[ReportController::class,'downloadPDF'])
-        ->name('reports.pdf')
-        ->middleware('role:admin');
+        
 });
 Route::group(['middleware' => ['auth', 'role:admin|employee']], function () {
 
@@ -76,6 +74,7 @@ Route::group(['middleware' => ['auth', 'role:admin|employee']], function () {
 
     Route::post('/reports/generate', [ReportController::class, 'generateReport'])->name('reports.generate');
 
+    Route::get('/reports/export-pdf', [ReportController::class, 'exportPDF'])->name('reports.export_pdf');
 });
 
 Route::get('/', function () {

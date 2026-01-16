@@ -8,6 +8,8 @@ use App\Models\Book;
 use App\Models\User;
 use App\Models\Review;
 use App\Models\Category;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -15,29 +17,13 @@ use Illuminate\Support\Facades\Log;
  * Handles the generation of analytical reports for the library system.
  */
 class ReportController extends Controller
-{
-    /**
-     * Display the initial reports page.
-     * * @return \Illuminate\View\View
-     */
-    public function index()
-    {
-        return view('reports.index');
-    }
-
-    /**
-     * Generate a comprehensive analytical report based on a date range.
-     * * @param ReportRequest $request
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\View\View
-     */
-    public function generateReport(ReportRequest $request)
-    {
+{  public function index(Request$request) {
         $validated = $request->validated();
         $start = $validated['start_date'];
         $end = $validated['end_date'];
 
         try {
-<<<<<<< Updated upstream
+            /** @var \Illuminate\Database\Eloquent\Builder $baseBookQuery */
             $baseBookQuery = Book::query();
 
             // Calculate Top Rated Books using dynamic average rating (Virtual Field)
@@ -65,6 +51,7 @@ class ReportController extends Controller
                 ->orderBy('borrows_count', 'desc')
                 ->take(5)->get();
 
+            // Get Least Borrowed Books
             $leastBorrowed = (clone $baseBookQuery)
                 ->withCount([
                     'borrows' => function ($q) use ($start, $end) {
@@ -89,44 +76,6 @@ class ReportController extends Controller
             })->get();
 
             // Identify top customers based on their total borrowing count
-=======
-            /**
-             * book rating report, top and lowest rated books, and average rating
-             */
-            $reports = Borrowing::with(['user', 'book'])->whereBetween('created_at', [$start, $end])
-                ->get();
-        
-            $topRatedBooks = Book::orderBy('overall_rating', 'desc')->take(5)->get();
-            $lowestRatedBooks = Book::orderBy('overall_rating', 'asc')->take(5)->get();
-            $avgRating = Book::avg('overall_rating');
-            /**
-             * most and least borrowed books, and average borrowing rate
-             */
-            $totalBorrowings = $reports->count();
-            $mostBorrowed = Book::withCount([
-                'borrowings' => function ($q) use ($start, $end) {
-                    $q->whereBetween('created_at', [$start, $end]);
-                }
-            ])->orderBy('borrowings_count', 'desc')->take(5)->get();
-            $leastBorrowed = Book::withCount([
-                'borrowings' => function ($q) use ($start, $end) {
-                    $q->whereBetween('created_at', [$start, $end]);
-                }
-            ])->orderBy('borrowings_count', 'asc')->take(5)->get();
-            $avgBorrowingCount = $reports->count() / max(Book::count(), 1);
-            /**
-             * active borrowings , and available books
-             */
-            $activeBorrowings = Borrowing::whereNull('returned_at')
-                ->whereBetween('created_at', [$start, $end])
-                ->count();
-            $availableBooks = Book::whereDoesntHave('borrowings', function ($q) {
-                $q->whereNull('returned_at');
-            })->count ();
-            /**
-             * top customers (most borrowed)
-             */
->>>>>>> Stashed changes
             $topCustomers = User::withCount([
                 'borrowings' => function ($q) use ($start, $end) {
                     $q->whereBetween('created_at', [$start, $end]);
@@ -155,8 +104,55 @@ class ReportController extends Controller
             ));
 
         } catch (\Exception $e) {
+            // Handle any unexpected errors during report generation
             Log::error('Report Error: ' . $e->getMessage());
             return back()->withErrors(['error' => 'حدث خطأ أثناء تحليل البيانات.']);
         }
     }
+    public function exportPDF(Request $request) 
+{
+    $start = $request->query('start_date');
+    $end = $request->query('end_date');
+    $baseBookQuery = Book::query();
+
+      $topRatedBooks = (clone $baseBookQuery)->withAvg('reviews', 'rating')
+        ->orderBy('reviews_avg_rating', 'desc')->take(5)->get();
+
+    $lowestRatedBooks = (clone $baseBookQuery)->withAvg('reviews', 'rating')
+        ->orderBy('reviews_avg_rating', 'asc')->take(5)->get();
+
+    $avgRating = \App\Models\Review::whereBetween('created_at', [$start, $end])->avg('rating') ?: 0;
+
+      $mostBorrowed = (clone $baseBookQuery)->withCount(['borrows' => function ($q) use ($start, $end) {
+        $q->whereBetween('created_at', [$start, $end]);
+    }])->orderBy('borrows_count', 'desc')->take(5)->get();
+
+    $leastBorrowed = (clone $baseBookQuery)->withCount(['borrows' => function ($q) use ($start, $end) {
+        $q->whereBetween('created_at', [$start, $end]);
+    }])->orderBy('borrows_count', 'asc')->take(5)->get();
+
+    $reports = \App\Models\Borrowing::with(['user', 'book'])
+        ->whereBetween('created_at', [$start, $end])->get();
+
+    $activeBorrowings = \App\Models\Borrowing::whereNull('returned_at')
+        ->whereBetween('created_at', [$start, $end])->with(['user', 'book'])->get();
+
+    $avgBorrowingCount = $reports->count() / max(Book::count(), 1);
+
+      $availableBooks = Book::whereDoesntHave('borrows', function ($q) {
+        $q->whereNull('returned_at');
+    })->get();
+
+    $topCustomers = \App\Models\User::withCount(['borrowings' => function ($q) use ($start, $end) {
+        $q->whereBetween('created_at', [$start, $end]);
+    }])->orderBy('borrowings_count', 'desc')->take(5)->get();
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('reports.pdf', compact(
+        'reports', 'topRatedBooks', 'lowestRatedBooks', 'avgRating', 
+        'mostBorrowed', 'leastBorrowed', 'avgBorrowingCount', 
+        'activeBorrowings', 'availableBooks', 'topCustomers', 'start', 'end'
+    ));
+
+    return $pdf->download('full-library-report.pdf');
+}
 }
