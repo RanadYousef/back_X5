@@ -46,6 +46,8 @@
                                 </span>
                                 <input type="date" name="end_date" id="end_date"
                                     class="form-control bg-dark text-white border-warning" required>
+                                
+
                             </div>
                         </div>
                     </div>
@@ -54,6 +56,11 @@
                         <button type="submit" class="btn btn-3d py-3 fs-5">
                             <i class="bi bi-file-earmark-bar-graph"></i> عرض التقرير التحليلي
                         </button>
+                        <a 
+                        href="{{ route('reports.export_pdf', ['start_date' => request('start_date'), 'end_date' => request('end_date')]) }}" 
+   class="btn btn-danger">
+   <i class="fa fa-file-pdf"></i> تحميل التقرير PDF
+</a>
                     </div>
                 </form>
             </div>

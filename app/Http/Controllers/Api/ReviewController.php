@@ -46,9 +46,8 @@ class ReviewController extends BaseApiController
         DB::beginTransaction();
         try {
 
-            $review = Review::create([
+            $review = $book->reviews()->create([
                 'user_id' => auth()->id(),
-                'book_id' => $validated['book_id'],
                 'rating' => $validated['rating'],
                 'status' => 'pending',
                 'comment' => $validated['comment'],
@@ -59,7 +58,7 @@ class ReviewController extends BaseApiController
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error storing review: ' . $e->getMessage(), ['book_id' => $book->id]);
+            Log::error('Error storing review: ' . $e->getMessage());
             return $this->error('Failed to add review', 500, );
         }
     }
