@@ -84,12 +84,13 @@ class BookController extends BaseApiController
     /**
      * Display a single book details.
      */
-    public function show(Book $book)
+    public function show($id)
     {
         try {
-            $book->load(['category']);
-            $book->loadAvg('reviews', 'rating');
-            $book->loadCount('borrows');
+            $book = Book::with('category')
+                ->withAvg('reviews', 'rating')
+                ->withCount('borrows')
+                ->findOrFail($id);
 
             return $this->success(
                 new BookResource($book),
@@ -98,7 +99,7 @@ class BookController extends BaseApiController
 
         } catch (\Exception $e) {
 
-            Log::error("API Book Show Error for Book {$book->id}: " . $e->getMessage());
+            Log::error("API Book Show Error for ID $id: " . $e->getMessage());
 
             return $this->error(
                 'Book not found',
