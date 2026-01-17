@@ -47,4 +47,4 @@ Route::get('/suggestions/top-rated', [BookController::class, 'topRated']);
 // categories routes
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}/books', [CategoryController::class, 'books']);
-Route::post('/categories/search', [CategoryController::class, 'search']);
+Route::get('/categories/search', [CategoryController::class, 'search']);
