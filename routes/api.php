@@ -9,9 +9,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BorrowingRequestController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\BookController;
-
 use App\Http\Controllers\Api\CategoryController;
-use App\Http\Controllers\Api\SupportController;
 
 
 Route::get('/user', function (Request $request) {
@@ -42,8 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
 //BOOKS API ROUTES
 Route::get('/books', [BookController::class, 'index']);
 Route::get('/books/{book}', [BookController::class, 'show']);
-Route::get('/books/{id}', [BookController::class, 'show']);
-Route::post('/books', [BookController::class, 'store']);
 Route::get('/suggestions/most-borrowed', [BookController::class, 'mostBorrowed']);
 Route::get('/suggestions/top-rated', [BookController::class, 'topRated']);
 
@@ -51,14 +47,4 @@ Route::get('/suggestions/top-rated', [BookController::class, 'topRated']);
 // categories routes
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}/books', [CategoryController::class, 'books']);
-Route::get('/categories/search', [CategoryController::class, 'search']);
-// email support route
-Route::post('/support/send', [SupportController::class, 'send']);
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/borrowings/current', [BorrowingRequestController::class, 'currentBorrowings']);
-    Route::get('/borrowings/history', [BorrowingRequestController::class, 'borrowingHistory']);
-    Route::post('/borrowings/request-borrow', [BorrowingRequestController::class, 'requestBorrow']);
-    Route::post('/borrowings/request-return/{borrowingId}', [BorrowingRequestController::class, 'requestReturn']);
-});
-
-
+Route::post('/categories/search', [CategoryController::class, 'search']);

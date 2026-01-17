@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -10,16 +11,16 @@ use Exception;
 
 class UserManagementController extends Controller
 {
-    /*
+    /**
      * index all users
      */
     public function index()
     {
         try {
-            $users = User::withTrashed()->with('roles')->latest()->get();
+            $users = User::with('roles')->latest()->get();
             return view('users.index', compact('users'));
         } catch (Exception $e) {
-            return back()->with('error', 'Failed to load users');
+            return back()->with('error', 'user data loading failed');
         }
     }
 
@@ -28,8 +29,12 @@ class UserManagementController extends Controller
      */
     public function create()
     {
-        $roles = Role::all();
-        return view('users.create', compact('roles'));
+        try {
+            $roles = Role::all();
+            return view('users.create', compact('roles'));
+        } catch (Exception $e) {
+            return back()->with('error', 'failed to load data');
+        }
     }
 
     /**
@@ -49,11 +54,14 @@ class UserManagementController extends Controller
            // assign role
             $user->assignRole($data['role']);
 
-            return redirect()->route('users.index')
-                ->with('success', 'User created successfully');
+            return redirect()
+                ->route('users.index')
+                ->with('success', 'created user successfully');
 
         } catch (Exception $e) {
-            return back()->with('error', 'Failed to create user');
+            return back()
+                ->withInput()
+                ->with('error', 'failed to create user');
         }
     }
 
@@ -62,8 +70,12 @@ class UserManagementController extends Controller
      */
     public function edit(User $user)
     {
-        $roles = Role::all();
-        return view('users.edit', compact('user', 'roles'));
+        try {
+            $roles = Role::all();
+            return view('users.edit', compact('user', 'roles'));
+        } catch (Exception $e) {
+            return back()->with('error','failed to load data');
+        }
     }
 
     /**
@@ -83,64 +95,49 @@ class UserManagementController extends Controller
             // 
             $user->syncRoles([$data['role']]);
 
-            return redirect()->route('users.index')
-                ->with('success', 'User updated successfully');
+            return redirect()
+                ->route('users.index')
+                ->with('success', 'updated user successfully');
 
         } catch (Exception $e) {
-            return back()->with('error', 'Failed to update user');
+            return back()
+                ->withInput()
+                ->with('error', 'failed to update user');
         }
     }
-
-    /** soft delet*/
-    public function destroy(User $user)
+    /**
+     * show user details
+     */
+     
+    public function show(User $user)
     {
-        try {
-            if ($user->hasRole('admin') && User::role('admin')->count() === 1) {
-                return back()->with('error', 'لا يمكن حذف المدير الوحيد');
-            }
-
-            $user->delete();
-
-            return redirect()->route('users.index')
-                ->with('success', 'User soft deleted');
-
-        } catch (Exception $e) {
-            return back()->with('error', 'Delete failed');
-        }
+        return view('users.show', compact('user'));
+        
     }
 
-    /** restore*/
-    public function restore($id)
-    {
-        try {
-            $user = User::withTrashed()->findOrFail($id);
-            $user->restore();
+ 
+    /**
+     *destory user 
+     */
+   public function destroy(User $user)
+{
+    try {
 
-            return redirect()->route('users.index')
-                ->with('success', 'User restored');
-
-        } catch (Exception $e) {
-            return back()->with('error', 'Restore failed');
+       // prevent deletion of yhe last manger
+       
+        if ($user->hasRole('admin') && User::role('admin')->count() === 1) {
+            return back()->with('error', 'لا يمكن حذف المدير الوحيد في النظام');
         }
+
+        $user->delete();
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'deleted user successfully');
+
+    } catch (Exception $e) {
+        return back()->with('error', 'failed to delete user');
     }
+}
 
-    /** delet final*/
-    public function forceDelete($id)
-    {
-        try {
-            $user = User::withTrashed()->findOrFail($id);
-
-            if ($user->hasRole('admin') && User::role('admin')->count() === 1) {
-                return back()->with('error', 'لا يمكن حذف المدير الوحيد نهائياً');
-            }
-
-            $user->forceDelete();
-
-            return redirect()->route('users.index')
-                ->with('success', 'User permanently deleted');
-
-        } catch (Exception $e) {
-            return back()->with('error', 'Force delete failed');
-        }
-    }
 }

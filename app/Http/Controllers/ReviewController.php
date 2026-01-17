@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Review;
-use App\Services\UserNotificationService;
 use Illuminate\Http\RedirectResponse;
 
 class ReviewController extends Controller
 {
     /**
-     * index all reviews
+     *index all reviews
      * (admin | employee)
      */
     public function index()
@@ -28,23 +27,13 @@ class ReviewController extends Controller
     public function approve(Review $review): RedirectResponse
     {
         try {
-            //update review status
             $review->update([
                 'status' => 'approved',
             ]);
 
-            //load relations
-            $review->load(['user', 'book']);
-
-            //send notification to user
-            UserNotificationService::reviewApproved(
-                $review->user,
-                $review->book->title
-            );
-
-            return back()->with('success', 'Successfully published review');
+            return back()->with('success', 'sucessfully published review');
         } catch (\Exception $e) {
-            return back()->with('error', 'Failed to publish review');
+            return back()->with('error', 'failed to publish review');
         }
     }
 
@@ -59,9 +48,9 @@ class ReviewController extends Controller
                 'status' => 'rejected',
             ]);
 
-            return back()->with('success', 'Review rejected successfully');
+            return back()->with('success', 'review rejected successfully');
         } catch (\Exception $e) {
-            return back()->with('error', 'Failed to reject review');
+            return back()->with('error', 'failed to reject review');
         }
     }
 
@@ -74,9 +63,9 @@ class ReviewController extends Controller
         try {
             $review->delete();
 
-            return back()->with('success', 'Deleted review successfully');
+            return back()->with('success', 'deleted review successfully');
         } catch (\Exception $e) {
-            return back()->with('error', 'Failed to delete review');
+            return back()->with('error', 'failed to delete review');
         }
     }
 }
