@@ -15,18 +15,17 @@ class AuthController extends BaseApiController
      */
     public function register(RegisterRequest $request)
     {
-        $data = $request->validated(); 
+        $data = $request->validated();
 
         $user = User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
+            'name' => $data['name'],
+            'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
-
         $token = $user->createToken('api-token')->plainTextToken;
 
         return $this->success([
-            'user'  => $user,
+            'user' => $user,
             'token' => $token,
         ], 'User registered successfully', 201);
     }
@@ -36,7 +35,7 @@ class AuthController extends BaseApiController
      */
     public function login(LoginRequest $request)
     {
-        $credentials = $request->validated();  
+        $credentials = $request->validated();
 
         if (!Auth::attempt($credentials)) {
             return $this->error('Invalid credentials', 401);
@@ -46,7 +45,7 @@ class AuthController extends BaseApiController
         $token = $user->createToken('api-token')->plainTextToken;
 
         return $this->success([
-            'user'  => $user,
+            'user' => $user,
             'token' => $token,
         ], 'Login successful');
     }
