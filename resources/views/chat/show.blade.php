@@ -143,7 +143,7 @@
 /* ===== Messages Container ===== */
 .messages-container {
     display: flex;
-    flex-direction: column-reverse; /* الحديث في الأعلى */
+    flex-direction: column-reverse; 
     overflow-y: auto;
     padding: 15px;
     height: 500px;
@@ -363,7 +363,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const messagesContainer = document.querySelector('.messages-container');
     if(messagesContainer) {
-        messagesContainer.scrollTop = 0; // الأعلى (الرسائل الحديثة)
+        messagesContainer.scrollTop = 0;
     }
 });
 </script>

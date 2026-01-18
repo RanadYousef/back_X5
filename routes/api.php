@@ -10,7 +10,7 @@ use App\Http\Controllers\Api\BorrowingRequestController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\CategoryController;
-
+use App\Http\Controllers\Api\SupportController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -34,6 +34,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/reviews/{book}', [ReviewController::class, 'store']);
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy']);
 });
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/my-reviews', [ReviewController::class, 'myReviews']);
+    Route::post('/reviews/{book}', [ReviewController::class, 'store']);
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy']);
+});
 
 
 
@@ -48,3 +53,5 @@ Route::get('/suggestions/top-rated', [BookController::class, 'topRated']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}/books', [CategoryController::class, 'books']);
 Route::get('/categories/search', [CategoryController::class, 'search']);
+// email support route
+Route::post('/support/send', [SupportController::class, 'send']);
