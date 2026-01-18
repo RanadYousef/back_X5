@@ -9,6 +9,9 @@ use App\Services\BorrowingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Notifications\LowStockNotification;
+use Illuminate\Support\Facades\Notification;
 
 class BorrowingController extends Controller
 {

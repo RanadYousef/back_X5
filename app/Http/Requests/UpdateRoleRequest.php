@@ -22,9 +22,8 @@ class UpdateRoleRequest extends FormRequest
     public function rules(): array
     {
         return [
-        // ignore($this->role->id) : لا تعتبر الاسم مكرراً إذا كان يخص نفس الدور الذي نعدله
-        'name' => 'required|max:255|unique:roles,name,' . $this->role->id,
-        'permissions' => 'required|array|min:1',
-    ];
+            'name' => 'required|max:255|unique:roles,name,' . $this->role->id,
+            'permissions' => 'required|array|min:1',
+        ];
     }
 }
