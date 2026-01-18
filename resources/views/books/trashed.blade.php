@@ -47,7 +47,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="text-muted py-4">
+                        <td colspan="4" class="text-white py-4">
                             No trashed books
                         </td>
                     </tr>

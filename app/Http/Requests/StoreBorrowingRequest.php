@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * فورم ريكوس خاص بعملية استعارة كتاب
+ * FormRequest is a special tool for the book borrowing process.
  */
 class StoreBorrowingRequest extends FormRequest
 {

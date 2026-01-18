@@ -21,17 +21,17 @@ class StoreRoleRequest extends FormRequest
      */
     public function rules(): array
     {
-       return [
-        'name' => 'required|unique:roles,name|max:255',
-        'permissions' => 'required|array|min:1', // تأكيد اختيار صلاحية واحدة على الأقل
-    ];
+        return [
+            'name' => 'required|unique:roles,name|max:255',
+            'permissions' => 'required|array|min:1',
+        ];
     }
     public function messages(): array
-{
-    return [
-        'name.required' => 'يجب إدخال اسم الدور.',
-        'name.unique' => 'هذا الدور موجود مسبقاً.',
-        'permissions.required' => 'يجب اختيار صلاحية واحدة على الأقل لهذا الدور.',
-    ];
-}
+    {
+        return [
+            'name.required' => 'يجب إدخال اسم الدور.',
+            'name.unique' => 'هذا الدور موجود مسبقاً.',
+            'permissions.required' => 'يجب اختيار صلاحية واحدة على الأقل لهذا الدور.',
+        ];
+    }
 }

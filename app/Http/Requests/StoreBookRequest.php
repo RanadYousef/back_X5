@@ -5,12 +5,12 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * فورم ريكوست خاص بعملية إضافة كتاب جديد
+ * Form Request for the process of adding a new book
  */
 class StoreBookRequest extends FormRequest
 {
     /**
-     * تحديد من يحق له تنفيذ الطلب
+     * Determining who is entitled to execute the request
      */
     public function authorize(): bool
     {
@@ -19,7 +19,7 @@ class StoreBookRequest extends FormRequest
     }
 
     /**
-     * قواعد التحقق من صحة البيانات
+     * Data validation rules
      */
     public function rules(): array
     {

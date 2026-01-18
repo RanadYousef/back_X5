@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * فورم ريكوست خاص بتعديل بيانات كتاب
+ * Form Request  for modifying book data
  */
 class UpdateBookRequest extends FormRequest
 {

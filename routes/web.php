@@ -44,7 +44,7 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth', 'role:admin|employee'])->group(function () {
     // Book Management Routes
     Route::resource('books', BookController::class);
-    Route::prefix('books')->group(function () {   
+    Route::prefix('books')->group(function () {
         Route::get('books/trashed', [BookController::class, 'trashed'])->name('books.trashed');
         Route::post('books/{id}/restore', [BookController::class, 'restore'])->name('books.restore');
         Route::delete('books/{id}/force-delete', [BookController::class, 'forceDelete'])->name('books.forceDelete');
@@ -61,13 +61,13 @@ Route::middleware(['auth', 'role:admin|employee'])->group(function () {
     Route::delete('/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.forceDelete');
 });
 
-Route::middleware(['auth' , 'role:admin'])->group(function () {
-    Route::get('/reports', [ReportController::class, 'index']) 
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/reports', [ReportController::class, 'index'])
         ->name('reports.index');
 
     Route::post('/reports/generate', [ReportController::class, 'generateReport'])
         ->name('reports.generate');
-        
+
 });
 Route::group(['middleware' => ['auth', 'role:admin|employee']], function () {
 
