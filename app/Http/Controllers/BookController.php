@@ -23,8 +23,14 @@ class BookController extends Controller
     {
         $categories = Category::all();
 
-        $query = Book::with('category');
-
+        $query = Book::with('category')
+          ->withAvg(['reviews as average_rating' => function ($q) {
+             $q->where('status', 'approved');
+            }], 'rating')
+          ->withCount(['reviews as ratings_count' => function ($q) {
+             $q->where('status', 'approved');
+            }]);
+        
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
