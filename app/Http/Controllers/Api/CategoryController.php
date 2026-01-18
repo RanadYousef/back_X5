@@ -42,7 +42,7 @@ class CategoryController extends BaseApiController
     {
         try {
             $category = Category::find($id);
-
+            
             if (!$category) {
                 Log::warning('API: Category not found', ['category_id' => $id]);
                 return $this->error('Category not found', 404);
@@ -74,7 +74,7 @@ class CategoryController extends BaseApiController
 
             return $this->success([
                 'category' => [
-                    'id' => $category->id,
+                    'id'   => $category->id,
                     'name' => $category->name,
                 ],
                 'books' => $books
@@ -83,7 +83,7 @@ class CategoryController extends BaseApiController
         } catch (Throwable $e) {
             Log::error('API: Failed to load category books', [
                 'category_id' => $id ?? null,
-                'exception' => $e->getMessage(),
+                'exception'   => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
@@ -121,7 +121,7 @@ class CategoryController extends BaseApiController
         } catch (Throwable $e) {
             Log::error('Category search failed', [
                 'search_term' => $validated['name'] ?? null,
-                'exception' => $e->getMessage(),
+                'exception'   => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
@@ -129,4 +129,4 @@ class CategoryController extends BaseApiController
         }
     }
 
-}
+    }

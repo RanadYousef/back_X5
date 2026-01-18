@@ -1,13 +1,14 @@
 <?php
 
 namespace App\Models;
-use Illuminate\Database\Eloquent\SoftDeletes;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 // Define the review model
 class Review extends Model
 {
-    use Hasfactory,softdeletes;
+    use HasFactory;
     // Define fillable attributes
    protected $fillable = [
         'user_id',
@@ -17,8 +18,7 @@ class Review extends Model
         'comment',
 
     ];
-    // Enable soft deletes
-    use softdeletes;
+    
     // Define relationships
 
     public function user()
