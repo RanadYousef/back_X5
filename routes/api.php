@@ -10,7 +10,9 @@ use App\Http\Controllers\Api\BorrowingRequestController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\LibraryLocationController;
 
+Route::get('/library/location', [LibraryLocationController::class, 'show']);
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -31,7 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-reviews', [ReviewController::class, 'myReviews']);
-    Route::post('/reviews/{book}', [ReviewController::class, 'store']);
+    Route::post('/reviews/add_review', [ReviewController::class, 'store']);
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy']);
 });
 
@@ -47,4 +49,4 @@ Route::get('/suggestions/top-rated', [BookController::class, 'topRated']);
 // categories routes
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}/books', [CategoryController::class, 'books']);
-Route::post('/categories/search', [CategoryController::class, 'search']);
+Route::get('/categories/search', [CategoryController::class, 'search']);
