@@ -86,26 +86,29 @@ class BookController extends BaseApiController
      */
     public function show(Book $book)
     {
-        try {
-            $book->load(['category']);
-            $book->loadAvg('reviews', 'rating');
-            $book->loadCount('borrows');
+    try {
+             $book->load(['category']);
+        $book->loadAvg('reviews', 'rating');
+        $book->loadCount('borrows');
 
-            return $this->success(
-                new BookResource($book),
-                'Book details loaded successfully'
-            );
+       $suggestions = Book::where('category_id', $book->category_id)
+            ->where('id', '!=', $book->id)
+            ->withAvg('reviews', 'rating')
+            ->orderByDesc('reviews_avg_rating')
+            ->take(4)
+            ->get();
 
-        } catch (\Exception $e) {
+        return $this->success([
+            'book' => new BookResource($book),
+            'suggestions' => BookResource::collection($suggestions), 
+        ], 'Book details and suggestions loaded successfully');
 
-            Log::error("API Book Show Error for Book {$book->id}: " . $e->getMessage());
-
-            return $this->error(
-                'Book not found',
-                404
-            );
-        }
+    } catch (\Exception $e) {
+        Log::error("API Book Show Error for Book {$book->id}: " . $e->getMessage());
+        return $this->error('Book not found', 404);
     }
+    }
+
 
     /**
      * Get most borrowed books (top suggestions).

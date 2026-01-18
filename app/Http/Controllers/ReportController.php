@@ -18,9 +18,9 @@ use Illuminate\Support\Facades\Log;
  */
 class ReportController extends Controller
 {  public function index(Request$request) {
-        $validated = $request->validated();
-        $start = $validated['start_date'];
-        $end = $validated['end_date'];
+    
+        $start = $request->input['start_date'];
+        $end = $request->input['end_date'];
 
         try {
             /** @var \Illuminate\Database\Eloquent\Builder $baseBookQuery */

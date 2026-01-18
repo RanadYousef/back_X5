@@ -60,14 +60,9 @@ Route::middleware(['auth', 'role:admin|employee'])->group(function () {
     Route::delete('/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.forceDelete');
 });
 
-Route::middleware(['auth' , 'role:admin'])->group(function () {
-    Route::get('/reports', [ReportController::class, 'index']) 
-        ->name('reports.index');
 
-    Route::post('/reports/generate', [ReportController::class, 'generateReport'])
-        ->name('reports.generate');
         
-});
+
 Route::group(['middleware' => ['auth', 'role:admin|employee']], function () {
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
