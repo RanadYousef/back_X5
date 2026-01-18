@@ -17,7 +17,13 @@ class Book extends Model
      'cover_image',
      'language',
      'copies_number',
-];
+    ];
+
+   protected $appends = [
+    'average_rating',
+    'ratings_count',
+  ];
+
 public function category(){
     return $this->belongsTo(Category::class);
   }
@@ -31,5 +37,31 @@ public function category(){
    public function reviews(){
     return $this->hasMany(Review::class);
   }
+
+    /**
+     * Only approved reviews for rating calculations.
+     */
+   public function approvedReviews()
+   {
+    return $this->reviews()->where('status', 'approved');
+   }
+
+    /**
+     * Computed attribute: total count of approved ratings.
+     */
+   public function getRatingsCountAttribute()
+   {
+     return $this->approvedReviews()->count();
+     
+   }
+
+   /**
+    * Computed attribute: average rating from approved reviews.
+    */
+   public function getAverageRatingAttribute()
+   {
+    return round($this->approvedReviews()->avg('rating') ?? 0, 1);
+   }
+
 }
   

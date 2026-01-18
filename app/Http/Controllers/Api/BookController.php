@@ -19,55 +19,52 @@ class BookController extends BaseApiController
             $filters = $request->validated();
 
             $query = Book::with('category')
-                ->withAvg('reviews', 'rating')
+                
                 ->withCount('borrows');
+                
+            $query
+            ->withAvg(['reviews as average_rating' => function ($q) { $q->where('status', 'approved');
+            }], 'rating');
 
-            // Search by title
-            if (!empty($filters['search'])) {
-                $query->where('title', 'LIKE', '%' . $filters['search'] . '%');
-            }
+            $query
+            ->withCount(['reviews as ratings_count' => function ($q) {$q->where('status', 'approved'); 
+            }]);
 
-            // Filter by category
-            if (!empty($filters['category_id'])) {
-                $query->where('category_id', $filters['category_id']);
-            }
+            $query
+                ->when($filters['search'] ?? null, function ($q, $search) {
+               $q->where('title', 'LIKE', "%{$search}%");
+                })
 
-            // Filter by language
-            if (!empty($filters['language'])) {
-                $query->where('language', $filters['language']);
-            }
+                ->when($filters['category_id'] ?? null, function ($q, $categoryId) {
+                $q->where('category_id', $categoryId);
+                })
 
-            // Filter by publish year
-            if (!empty($filters['publish_year'])) {
-                $query->where('publish_year', $filters['publish_year']);
-            }
+                ->when($filters['language'] ?? null, function ($q, $language) {
+                $q->where('language', $language);
+                })
 
-            // Sorting
-            if (!empty($filters['sort'])) {
+               ->when($filters['publish_year'] ?? null, function ($q, $year) {
+               $q->where('publish_year', $year);
+               })
 
-                switch ($filters['sort']) {
-
-                    case 'rating':
-                        $query->orderBy('reviews_avg_rating', 'DESC');
-                        break;
-
-
-                    case 'year':
-                        $query->orderBy('publish_year', 'DESC');
-                        break;
-
-                    case 'title':
-                        $query->orderBy('title', 'ASC');
-                        break;
-                }
-            }
+               ->when($filters['sort'] ?? null, function ($q, $sort) {
+               match ($sort) {
+                'rating' => $q->orderBy('average_rating', 'DESC'),
+                'year'   => $q->orderBy('publish_year', 'DESC'),
+                'title'  => $q->orderBy('title', 'ASC'),
+                default  => null,
+                 };
+               });
 
             $perPage = $filters['per_page'] ?? 10;
             $books = $query->paginate($perPage);
+            $message = $books->isEmpty()
+                ? 'No books match the filter.'
+                : 'Books retrieved successfully';
 
             return $this->success(
                 BookResource::collection($books),
-                'Books retrieved successfully'
+             $message
             );
 
         } catch (\Exception $e) {
@@ -88,7 +85,7 @@ class BookController extends BaseApiController
     {
         try {
             $book = Book::with('category')
-                ->withAvg('reviews', 'rating')
+                
                 ->withCount('borrows')
                 ->findOrFail($id);
 
@@ -143,8 +140,15 @@ class BookController extends BaseApiController
     {
         try {
             $books = Book::with('category')
-                ->withAvg('reviews', 'rating')
-                ->orderBy('reviews_avg_rating', 'DESC')
+                ->withAvg(
+                ['reviews as average_rating' => function ($q) {
+                    $q->where('status', 'approved');
+                    }], 'rating')
+                
+                ->withCount(['reviews as ratings_count' => function ($q) {
+                    $q->where('status', 'approved');
+                }])
+                ->orderByDesc('average_rating')
                 ->take(10)
                 ->get();
 
