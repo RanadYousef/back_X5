@@ -66,26 +66,35 @@ class ReviewController extends BaseApiController
     }
 
     /**
-     * Undocumented function
-     *delete a review
-     * @param [type] $id
-     * @return void
+     * Delete a review (only if it belongs to the authenticated user)
+     *
+     * @param Request $request
+     * @param int $reviewId
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(Review $review)
+    public function destroy(Request $request, $reviewId)
     {
         try {
+            $review = Review::findOrFail($reviewId);
+
+            // Check if the review belongs to the authenticated user
             if ($review->user_id !== auth()->id()) {
-                return $this->error('Unauthorized to delete this review', 403);
+                return $this->error('You are not authorized to delete this review', 403);
             }
+
+            DB::beginTransaction();
 
             $review->delete();
 
-            return $this->success(null, 'Review deleted successfully');
+            DB::commit();
 
+            return $this->success(null, 'Review deleted successfully');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->error('Review not found', 404);
         } catch (\Exception $e) {
-            Log::error('Error deleting review ID ' . $review->id . ': ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('Error deleting review: ' . $e->getMessage(), ['user_id' => auth()->id(), 'review_id' => $reviewId]);
             return $this->error('Failed to delete review', 500);
         }
     }
-
 }
