@@ -9,6 +9,10 @@ class SendMessageRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
+    /**
+     * Summary of authorize
+     * @return bool
+     */
     public function authorize(): bool
     {
         return true;
@@ -16,6 +20,10 @@ class SendMessageRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     */
+    /**
+     * Summary of rules
+     * @return array{message: string}
      */
     public function rules(): array
     {
@@ -26,6 +34,10 @@ class SendMessageRequest extends FormRequest
 
     /**
      * Get the error messages for the defined validation rules.
+     */
+    /**
+     * Summary of messages
+     * @return array{message.max: string, message.min: string, message.required: string, message.string: string}
      */
     public function messages(): array
     {

@@ -12,6 +12,10 @@ class ReviewController extends Controller
      * index all reviews
      * (admin | employee)
      */
+    /**
+     * Summary of index
+     * @return \Illuminate\Contracts\View\View
+     */
     public function index()
     {
         $reviews = Review::with(['user', 'book'])
@@ -24,6 +28,11 @@ class ReviewController extends Controller
     /**
      * approve review
      * (employee only)
+     */
+    /**
+     * Summary of approve
+     * @param Review $review
+     * @return RedirectResponse
      */
     public function approve(Review $review): RedirectResponse
     {
@@ -49,8 +58,9 @@ class ReviewController extends Controller
     }
 
     /**
-     * reject review
-     * (employee only)
+     * Summary of reject
+     * @param Review $review
+     * @return RedirectResponse
      */
     public function reject(Review $review): RedirectResponse
     {
@@ -66,8 +76,9 @@ class ReviewController extends Controller
     }
 
     /**
-     * delete review
-     * (employee only)
+     * Summary of destroy
+     * @param Review $review
+     * @return RedirectResponse
      */
     public function destroy(Review $review): RedirectResponse
     {

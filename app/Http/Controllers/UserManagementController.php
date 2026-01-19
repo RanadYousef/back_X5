@@ -8,11 +8,15 @@ use Spatie\Permission\Models\Role;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use Exception;
-
+/**
+ * Summary of UserManagementController
+ */
 class UserManagementController extends Controller
 {
     /**
-     * index all users
+     * 
+     *
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      */
     public function index()
     {
@@ -25,7 +29,8 @@ class UserManagementController extends Controller
     }
 
     /**
-     * create user page
+     * Summary of create
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      */
     public function create()
     {
@@ -66,7 +71,9 @@ class UserManagementController extends Controller
     }
 
     /**
-     * edit user page
+     * Summary of edit
+     * @param User $user
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      */
     public function edit(User $user)
     {
@@ -79,7 +86,10 @@ class UserManagementController extends Controller
     }
 
     /**
-     *  update user data
+     * Summary of update
+     * @param UpdateUserRequest $request
+     * @param User $user
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateUserRequest $request, User $user)
     {
@@ -106,7 +116,9 @@ class UserManagementController extends Controller
         }
     }
     /**
-     * show user details
+     * Summary of show
+     * @param User $user
+     * @return \Illuminate\Contracts\View\View
      */
      
     public function show(User $user)
@@ -116,15 +128,16 @@ class UserManagementController extends Controller
     }
 
  
-    /**
-     *destory user 
-     */
+   /**
+    * Summary of destroy
+    * @param User $user
+    * @return \Illuminate\Http\RedirectResponse
+    */
    public function destroy(User $user)
 {
     try {
 
-       // prevent deletion of yhe last manger
-       
+        //prevent deleting the only admin
         if ($user->hasRole('admin') && User::role('admin')->count() === 1) {
             return back()->with('error', 'لا يمكن حذف المدير الوحيد في النظام');
         }

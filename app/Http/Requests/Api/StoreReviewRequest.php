@@ -4,9 +4,15 @@ namespace App\Http\Requests\Api;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
+/**
+ * Summary of StoreReviewRequest
+ */
 class StoreReviewRequest extends FormRequest
-{
+{   
+    /**
+     * Summary of authorize
+     * @return bool
+     */
     public function authorize(): bool
     {
         return true;
