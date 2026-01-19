@@ -34,19 +34,15 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-reviews', [ReviewController::class, 'myReviews']);
-    Route::post('/reviews/add_review', [ReviewController::class, 'store']);
-    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy']);
-});
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/my-reviews', [ReviewController::class, 'myReviews']);
-    Route::post('/reviews/{book}', [ReviewController::class, 'store']);
-    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy']);
+    Route::post('/reviews/{id}', [ReviewController::class, 'store']);
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->withTrashed();
 });
 
 
 
 //BOOKS API ROUTES
 Route::get('/books', [BookController::class, 'index']);
+Route::get('/books/{book}', [BookController::class, 'show'])->withTrashed();
 Route::get('/books/{id}', [BookController::class, 'show']);
 Route::get('/suggestions/most-borrowed', [BookController::class, 'mostBorrowed']);
 Route::get('/suggestions/top-rated', [BookController::class, 'topRated']);
