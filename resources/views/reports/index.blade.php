@@ -10,8 +10,9 @@
 
         <div class="row justify-content-center">
             <div class="col-md-10">
-                <p class="text-white-50 mb-4 text-center">اختر النطاق الزمني لعرض إحصائيات التقييم، الاستعارات النشطة،
-                    وتحليل أداء الكتب.</p>
+                <p class="text-white-50 mb-4 text-center">
+                    اختر النطاق الزمني لعرض إحصائيات التقييم، الاستعارات النشطة وتحليل أداء الكتب.
+                </p>
 
                 @if ($errors->any())
                     <div class="alert alert-danger bg-dark text-danger border-danger shadow-sm">
@@ -26,6 +27,7 @@
                 <form action="{{ route('reports.generate') }}" method="POST"
                     class="bg-dark-custom p-4 rounded border border-warning shadow">
                     @csrf
+
                     <div class="row g-4">
                         <div class="col-md-6">
                             <label for="start_date" class="form-label text-warning fw-bold">من تاريخ:</label>
@@ -46,21 +48,14 @@
                                 </span>
                                 <input type="date" name="end_date" id="end_date"
                                     class="form-control bg-dark text-white border-warning" required>
-                                
-
                             </div>
                         </div>
                     </div>
 
                     <div class="d-grid mt-5">
-                        <button type="submit" class="btn btn-3d py-3 fs-5">
+                        <button type="submit" class="btn btn-3d py-3 fs-5 shadow-lg">
                             <i class="bi bi-file-earmark-bar-graph"></i> عرض التقرير التحليلي
                         </button>
-                        <a 
-                        href="{{ route('reports.export_pdf', ['start_date' => request('start_date'), 'end_date' => request('end_date')]) }}" 
-   class="btn btn-danger">
-   <i class="fa fa-file-pdf"></i> تحميل التقرير PDF
-</a>
                     </div>
                 </form>
             </div>
@@ -69,21 +64,30 @@
 
     <style>
         .bg-dark-custom {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.35);
             backdrop-filter: blur(10px);
         }
 
+        .card-glass {
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(12px);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 193, 7, 0.25);
+        }
+
         .btn-3d {
-            background: linear-gradient(145deg, #ffc107, #e0a800);
+            background: linear-gradient(145deg, #ffc107, #ffb300);
             color: #000;
             font-weight: bold;
             border: none;
-            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+            transition: all 0.25s ease;
         }
 
         .btn-3d:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 8px 25px rgba(255, 193, 7, 0.45);
             color: #000;
         }
 
