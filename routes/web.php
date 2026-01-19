@@ -19,6 +19,7 @@ use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BorrowingController;
+use App\Http\Controllers\ChatController;
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
@@ -43,7 +44,7 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth', 'role:admin|employee'])->group(function () {
     // Book Management Routes
     Route::resource('books', BookController::class);
-    Route::prefix('books')->group(function () {   
+    Route::prefix('books')->group(function () {
         Route::get('books/trashed', [BookController::class, 'trashed'])->name('books.trashed');
         Route::post('books/{id}/restore', [BookController::class, 'restore'])->name('books.restore');
         Route::delete('books/{id}/force-delete', [BookController::class, 'forceDelete'])->name('books.forceDelete');
@@ -60,13 +61,13 @@ Route::middleware(['auth', 'role:admin|employee'])->group(function () {
     Route::delete('/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.forceDelete');
 });
 
-Route::middleware(['auth' , 'role:admin'])->group(function () {
-    Route::get('/reports', [ReportController::class, 'index']) 
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/reports', [ReportController::class, 'index'])
         ->name('reports.index');
 
     Route::post('/reports/generate', [ReportController::class, 'generateReport'])
         ->name('reports.generate');
-        
+
 });
 Route::group(['middleware' => ['auth', 'role:admin|employee']], function () {
 
@@ -142,7 +143,92 @@ Route::middleware(['auth', 'role:employee'])->group(function () {
         ->name('reviews.destroy');
 
 });
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('users', UserManagementController::class);
+
+Route::patch('users/{id}/restore',
+    [UserManagementController::class, 'restore']
+)->name('users.restore');
+
+Route::delete('users/{id}/force-delete',
+    [UserManagementController::class, 'forceDelete']
+)->name('users.forceDelete');
+});
+
+Route::middleware('auth')->group(function(){
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/create', [ChatController::class, 'create'])->name('chat.create');
+    Route::post('/chat', [ChatController::class, 'store'])->name('chat.store');
+    Route::get('/chat/{conversation}', [ChatController::class, 'show'])->name('chat.show');
+    Route::post('/chat/{conversation}/send', [ChatController::class, 'send'])->name('chat.send');
+    Route::delete('/chat/{conversation}', [ChatController::class, 'destroy'])->name('chat.destroy');
+});
+
+
 require __DIR__ . '/auth.php';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

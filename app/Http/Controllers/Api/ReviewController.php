@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
+
 class ReviewController extends BaseApiController
 {
     /**
@@ -40,17 +41,18 @@ class ReviewController extends BaseApiController
      * @param StoreReviewRequest $request
      * @return void
      */
-    public function store(StoreReviewRequest $request, Book $book)
+    public function store(StoreReviewRequest $request)
     {
         $validated = $request->validated();
         DB::beginTransaction();
         try {
 
-            $review = $book->reviews()->create([
+            $review = Review::create([
                 'user_id' => auth()->id(),
                 'rating' => $validated['rating'],
                 'status' => 'pending',
                 'comment' => $validated['comment'],
+                'book_id' => $validated['book_id'],
             ]);
 
             DB::commit();

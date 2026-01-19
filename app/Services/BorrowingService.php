@@ -5,6 +5,9 @@ namespace App\Services;
 use App\Models\Borrowing;
 use App\Models\BorrowingRequest;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Notifications\LowStockNotification;
+use Illuminate\Support\Facades\Notification;
 
 class BorrowingService
 {
@@ -29,6 +32,10 @@ class BorrowingService
                 ]);
 
                 $book->decrement('copies_number');
+                if ($book->copies_number <= 0) {
+                    $admins = User::role('admin')->get();
+                    Notification::send($admins, new LowStockNotification($book));
+                }
 
             } elseif ($borrowRequest->request_type === 'return') {
                 // Find the specific borrowing record linked to this request

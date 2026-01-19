@@ -29,7 +29,6 @@ class Borrowing extends Model
 
 
     /*
-      العلاقة مع المستخدم
       user (1) -> borrowings (*)
      */
     public function user()
@@ -38,7 +37,6 @@ class Borrowing extends Model
     }
 
     /*
-      العلاقة مع الكتاب
       book (1) -> borrowings (*)
      */
     public function book()
