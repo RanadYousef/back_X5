@@ -146,11 +146,7 @@ Route::middleware(['auth', 'role:employee'])->group(function () {
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('users', UserManagementController::class);
 
-    Route::patch(
-        'users/{id}/restore',
-        [UserManagementController::class, 'restore']
-    )->name('users.restore');
-
+    Route::post('users/{id}/restore', [UserManagementController::class, 'restore'])->name('users.restore');
     Route::delete(
         'users/{id}/force-delete',
         [UserManagementController::class, 'forceDelete']

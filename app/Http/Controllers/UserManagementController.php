@@ -8,28 +8,28 @@ use Spatie\Permission\Models\Role;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use Exception;
-/**
- * Summary of UserManagementController
- */
+
 class UserManagementController extends Controller
 {
     /**
      * 
-     *
+     * 
      * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      */
     public function index()
     {
         try {
             $users = User::with('roles')->latest()->get();
-            return view('users.index', compact('users'));
+            $deletedUsers = User::onlyTrashed()->with('roles')->get(); // ✅ المحذوفون
+            return view('users.index', compact('users', 'deletedUsers'));
         } catch (Exception $e) {
-            return back()->with('error', 'user data loading failed');
+            return back()->with('error', 'فشل تحميل بيانات المستخدمين');
         }
     }
 
     /**
-     * Summary of create
+     * 
+     * 
      * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      */
     public function create()
@@ -38,13 +38,15 @@ class UserManagementController extends Controller
             $roles = Role::all();
             return view('users.create', compact('roles'));
         } catch (Exception $e) {
-            return back()->with('error', 'failed to load data');
+            return back()->with('error', 'فشل تحميل البيانات');
         }
     }
 
     /**
      * 
-     * store new user
+     * 
+     * @param StoreUserRequest $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreUserRequest $request)
     {
@@ -58,20 +60,15 @@ class UserManagementController extends Controller
 
            // assign role
             $user->assignRole($data['role']);
-
-            return redirect()
-                ->route('users.index')
-                ->with('success', 'created user successfully');
-
+            return redirect()->route('users.index')->with('success', 'تم إنشاء المستخدم بنجاح');
         } catch (Exception $e) {
-            return back()
-                ->withInput()
-                ->with('error', 'failed to create user');
+            return back()->withInput()->with('error', 'فشل إنشاء المستخدم');
         }
     }
 
     /**
-     * Summary of edit
+     * 
+     * 
      * @param User $user
      * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      */
@@ -81,12 +78,13 @@ class UserManagementController extends Controller
             $roles = Role::all();
             return view('users.edit', compact('user', 'roles'));
         } catch (Exception $e) {
-            return back()->with('error','failed to load data');
+            return back()->with('error','فشل تحميل البيانات');
         }
     }
 
     /**
-     * Summary of update
+     * 
+     * 
      * @param UpdateUserRequest $request
      * @param User $user
      * @return \Illuminate\Http\RedirectResponse
@@ -101,56 +99,78 @@ class UserManagementController extends Controller
                 'name'  => $data['name'],
                 'email' => $data['email'],
             ]);
-
-            // 
-            $user->syncRoles([$data['role']]);
-
-            return redirect()
-                ->route('users.index')
-                ->with('success', 'updated user successfully');
-
+            // $user->syncRoles([$data['role']]); // إذا أردت تحديث الدور
+            return redirect()->route('users.index')->with('success', 'تم تحديث المستخدم بنجاح');
         } catch (Exception $e) {
-            return back()
-                ->withInput()
-                ->with('error', 'failed to update user');
+            return back()->withInput()->with('error', 'فشل تحديث المستخدم');
         }
     }
+
     /**
-     * Summary of show
+     * 
+     * 
      * @param User $user
      * @return \Illuminate\Contracts\View\View
      */
-     
     public function show(User $user)
     {
         return view('users.show', compact('user'));
-        
     }
 
- 
-   /**
-    * Summary of destroy
-    * @param User $user
-    * @return \Illuminate\Http\RedirectResponse
-    */
-   public function destroy(User $user)
-{
-    try {
+    /**
+     * 
+     * 
+     * @param User $user
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(User $user)
+    {
+        try {
+            if ($user->hasRole('admin') && User::role('admin')->count() === 1) {
+                return back()->with('error', 'لا يمكن حذف المدير الوحيد في النظام');
+            }
 
-        //prevent deleting the only admin
-        if ($user->hasRole('admin') && User::role('admin')->count() === 1) {
-            return back()->with('error', 'لا يمكن حذف المدير الوحيد في النظام');
+            $user->delete(); // ✅ حذف ناعم
+            return redirect()->route('users.index')->with('success', 'تم حذف المستخدم بنجاح');
+        } catch (Exception $e) {
+            return back()->with('error', 'فشل حذف المستخدم');
         }
-
-        $user->delete();
-
-        return redirect()
-            ->route('users.index')
-            ->with('success', 'deleted user successfully');
-
-    } catch (Exception $e) {
-        return back()->with('error', 'failed to delete user');
     }
-}
 
+    /**
+     * 
+     * 
+     * @param mixed $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function restore($id)
+    {
+        try {
+            $user = User::onlyTrashed()->findOrFail($id);
+            $user->restore();
+            return redirect()->route('users.index')->with('success', 'تم استرجاع المستخدم بنجاح');
+        } catch (Exception $e) {
+            return back()->with('error', 'فشل استرجاع المستخدم');
+        }
+    }
+
+    /**
+     * 
+     * 
+     * @param mixed $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function forceDelete($id)
+    {
+        try {
+            $user = User::onlyTrashed()->findOrFail($id);
+
+            if ($user->hasRole('admin') && User::role('admin')->count() === 1) {
+                return back()->with('error', 'لا يمكن حذف المدير الوحيد في النظام');
+            }$user->forceDelete();
+            return redirect()->route('users.index')->with('success', 'تم حذف المستخدم نهائياً');
+        } catch (Exception $e) {
+            return back()->with('error', 'فشل حذف المستخدم نهائياً');
+        }
+    }
 }
