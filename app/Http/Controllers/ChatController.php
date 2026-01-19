@@ -16,6 +16,10 @@ class ChatController extends Controller
     /**
      * Display all conversations for the authenticated user
      */
+    /**
+     * Summary of index
+     * @return \Illuminate\Contracts\View\View
+     */
     public function index()
     {
         $user = auth()->user();
@@ -33,6 +37,11 @@ class ChatController extends Controller
 
     /**
      * Show a specific conversation with all messages
+     */
+    /**
+     * Summary of show
+     * @param Conversation $conversation
+     * @return \Illuminate\Contracts\View\View
      */
     public function show(Conversation $conversation)
     {
@@ -55,6 +64,12 @@ class ChatController extends Controller
 
     /**
      * Send a message in a conversation
+     */
+    /**
+     * Summary of send
+     * @param SendMessageRequest $request
+     * @param Conversation $conversation
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function send(SendMessageRequest $request, Conversation $conversation)
     {
@@ -91,6 +106,10 @@ class ChatController extends Controller
     /**
      * Create a new conversation
      */
+    /**
+     * Summary of create
+     * @return \Illuminate\Contracts\View\View
+     */
     public function create()
     {
         // Get all users except the current user
@@ -100,6 +119,11 @@ class ChatController extends Controller
 
     /**
      * Store a new conversation
+     */
+    /**
+     * Summary of store
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
@@ -137,6 +161,11 @@ class ChatController extends Controller
 
     /**
      * Delete a conversation
+     */
+    /**
+     * Summary of destroy
+     * @param Conversation $conversation
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Conversation $conversation)
     {

@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+/**
+ * Summary of StoreUserRequest
+ */
 class StoreUserRequest extends FormRequest
 {
     public function authorize(): bool
@@ -11,6 +13,10 @@ class StoreUserRequest extends FormRequest
         return true;
     }
     // validation rules for creating user
+    /**
+     * Summary of rules
+     * @return array{email: string, name: string, password: string, role: string}
+     */
     public function rules(): array
     {
         return [
