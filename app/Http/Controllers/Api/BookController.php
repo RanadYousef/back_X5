@@ -19,42 +19,48 @@ class BookController extends BaseApiController
             $filters = $request->validated();
 
             $query = Book::with('category')
-                
+
                 ->withCount('borrows');
-                
-            $query
-            ->withAvg(['reviews as average_rating' => function ($q) { $q->where('status', 'approved');
-            }], 'rating');
 
             $query
-            ->withCount(['reviews as ratings_count' => function ($q) {$q->where('status', 'approved'); 
-            }]);
+                ->withAvg([
+                    'reviews as average_rating' => function ($q) {
+                        $q->where('status', 'approved');
+                    }
+                ], 'rating');
+
+            $query
+                ->withCount([
+                    'reviews as ratings_count' => function ($q) {
+                        $q->where('status', 'approved');
+                    }
+                ]);
 
             $query
                 ->when($filters['search'] ?? null, function ($q, $search) {
-               $q->where('title', 'LIKE', "%{$search}%");
+                    $q->where('title', 'LIKE', "%{$search}%");
                 })
 
                 ->when($filters['category_id'] ?? null, function ($q, $categoryId) {
-                $q->where('category_id', $categoryId);
+                    $q->where('category_id', $categoryId);
                 })
 
                 ->when($filters['language'] ?? null, function ($q, $language) {
-                $q->where('language', $language);
+                    $q->where('language', $language);
                 })
 
-               ->when($filters['publish_year'] ?? null, function ($q, $year) {
-               $q->where('publish_year', $year);
-               })
+                ->when($filters['publish_year'] ?? null, function ($q, $year) {
+                    $q->where('publish_year', $year);
+                })
 
-               ->when($filters['sort'] ?? null, function ($q, $sort) {
-               match ($sort) {
-                'rating' => $q->orderBy('average_rating', 'DESC'),
-                'year'   => $q->orderBy('publish_year', 'DESC'),
-                'title'  => $q->orderBy('title', 'ASC'),
-                default  => null,
-                 };
-               });
+                ->when($filters['sort'] ?? null, function ($q, $sort) {
+                    match ($sort) {
+                        'rating' => $q->orderBy('average_rating', 'DESC'),
+                        'year' => $q->orderBy('publish_year', 'DESC'),
+                        'title' => $q->orderBy('title', 'ASC'),
+                        default => null,
+                    };
+                });
 
             $perPage = $filters['per_page'] ?? 10;
             $books = $query->paginate($perPage);
@@ -64,7 +70,7 @@ class BookController extends BaseApiController
 
             return $this->success(
                 BookResource::collection($books),
-             $message
+                $message
             );
 
         } catch (\Exception $e) {
@@ -83,35 +89,23 @@ class BookController extends BaseApiController
      */
     public function show($id)
     {
-    try {
-             $book->load(['category']);
-        $book->loadAvg('reviews', 'rating');
-        $book->loadCount('borrows');
-
-       $suggestions = Book::where('category_id', $book->category_id)
-            ->where('id', '!=', $book->id)
-            ->withAvg('reviews', 'rating')
-            ->orderByDesc('reviews_avg_rating')
-            ->take(4)
-            ->get();
-
-        return $this->success([
-            'book' => new BookResource($book),
-            'suggestions' => BookResource::collection($suggestions), 
-        ], 'Book details and suggestions loaded successfully');
-
-    } catch (\Exception $e) {
-        Log::error("API Book Show Error for Book {$book->id}: " . $e->getMessage());
-        return $this->error('Book not found', 404);
-    }
         try {
             $book = Book::with('category')
-                
                 ->withCount('borrows')
                 ->findOrFail($id);
+            $book->loadAvg('reviews', 'rating');
+            $suggestions = Book::where('category_id', $book->category_id)
+                ->where('id', '!=', $book->id)
+                ->withAvg('reviews', 'rating')
+                ->orderByDesc('reviews_avg_rating')
+                ->take(4)
+                ->get();
 
             return $this->success(
-                new BookResource($book),
+                [
+                    'book' => new BookResource($book),
+                    'suggestions' => BookResource::collection($suggestions),
+                ],
                 'Book details loaded successfully'
             );
 
@@ -163,13 +157,19 @@ class BookController extends BaseApiController
         try {
             $books = Book::with('category')
                 ->withAvg(
-                ['reviews as average_rating' => function ($q) {
-                    $q->where('status', 'approved');
-                    }], 'rating')
-                
-                ->withCount(['reviews as ratings_count' => function ($q) {
-                    $q->where('status', 'approved');
-                }])
+                    [
+                        'reviews as average_rating' => function ($q) {
+                            $q->where('status', 'approved');
+                        }
+                    ],
+                    'rating'
+                )
+
+                ->withCount([
+                    'reviews as ratings_count' => function ($q) {
+                        $q->where('status', 'approved');
+                    }
+                ])
                 ->orderByDesc('average_rating')
                 ->take(10)
                 ->get();

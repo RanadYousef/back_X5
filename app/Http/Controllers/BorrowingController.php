@@ -9,41 +9,64 @@ use App\Services\BorrowingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Notifications\LowStockNotification;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
+/**
+ * Class BorrowingController
+ * Handles the administrative actions for book borrowing and return requests.
+ */
 class BorrowingController extends Controller
 {
+    /**
+     * @var BorrowingService
+     */
     protected $borrowingService;
+
+    /**
+     * BorrowingController constructor.
+     * * @param BorrowingService $borrowingService
+     */
     public function __construct(BorrowingService $borrowingService)
     {
         $this->borrowingService = $borrowingService;
     }
+
     /**
      * Display borrowing management dashboard.
+     * * @return View
      */
-    public function index()
+    public function index(): View
     {
         // Only fetch requests that actually need staff action
         $pendingRequests = BorrowingRequest::with(['book', 'user'])
             ->where('status', 'pending')
             ->latest()
             ->get();
+
         return view('borrowings.index', compact('pendingRequests'));
     }
-    public function history()
+
+    /**
+     * Display a complete history of all borrowings.
+     * * @return View
+     */
+    public function history(): View
     {
         $borrowings = Borrowing::with(['book', 'user'])
             ->latest()
             ->get();
+
         return view('borrowings.history', compact('borrowings'));
     }
 
     /**
      * Approve borrow or return request.
+     *
+     * @param BorrowingRequest $borrowRequest The request instance being approved.
+     * @return RedirectResponse
      */
-    public function approve(BorrowingRequest $borrowRequest)
+    public function approve(BorrowingRequest $borrowRequest): RedirectResponse
     {
         try {
             $this->borrowingService->approveRequest($borrowRequest);
@@ -57,8 +80,11 @@ class BorrowingController extends Controller
 
     /**
      * Reject a borrow or return request.
+     *
+     * @param BorrowingRequest $borrowRequest The request instance being rejected.
+     * @return RedirectResponse
      */
-    public function reject(BorrowingRequest $borrowRequest)
+    public function reject(BorrowingRequest $borrowRequest): RedirectResponse
     {
         try {
             $this->borrowingService->rejectRequest($borrowRequest);
@@ -68,6 +94,5 @@ class BorrowingController extends Controller
             Log::error('Borrowing rejection error: ' . $e->getMessage());
             return back()->with('error', 'An internal error occurred during rejection.');
         }
-
     }
 }
