@@ -1,16 +1,36 @@
 # 📚 Digital Library Management System
-### Digital Library Management System is a streamlined administrative dashboard and user interface designed to manage digital catalogs efficiently. The system provides an intuitive experience for browsing books by category, tracking loan requests, and managing user interactions through a robust rating and review system.
+> The Digital Library Management System is a full-stack web application built to manage library operations in an organized and efficient way.  
+The system supports both web (Blade) and API-based interactions, allowing administrators, employees, and subscribers to interact with the platform according to their roles and permissions
+
 ---
+
+
+## 📸 Screenshots
+
+![Screenshot 1](screenshots/first.png)
+![Screenshot 2](screenshots/two.png)
+![Screenshot 5](screenshots/eight.png)
+![Screenshot 3](screenshots/three.png)
+![Screenshot 4](screenshots/four.png)
+![Screenshot 3](screenshots/three.png)
+![Screenshot 6](screenshots/nine.png)
+![Screenshot 6](screenshots/twelve.png)
+![Screenshot 6](screenshots/thirteen.png)
+![Screenshot 7](screenshots/ten.png)
+![Screenshot 8](screenshots/eleven.png)
+
+</div>
+
 # 📑 Table of Contents
 
 * [📖 Project Overview](#-project-overview)
 * [📸 Screenshots](#-screenshots)
-* [⚙️ Requirements](#️-requirements)
-* [🛠️ Installation & Setup](#️-installation--setup)
+* [⚙️ Requirements](#️-technical-requirements)
+* [🛠️ Installation & Setup](#️getting-started-&-installation)
 * [👥 System Roles](#-system-roles)
 * [🗄️ Database Structure](#️-database-structure)
-* [🔗 Interfaces & Routes](#-interfaces--routes)
-* [📡 API Documentation](#-api-documentation)
+* [🔗 Interfaces & Routes](#-system-interfaces-&-routes)
+* [📡 API Documentation](#-api-documentation-postman-guide)
 * [📄 Sample Responses](#-sample-responses)
 * [🔑 Sample Credentials](#-sample-credentials)
 * [📞 Support & Contributions](#-support--contributions)
@@ -18,6 +38,7 @@
 * [💻 Development Team](#-development-team)
 
 ---
+
 ## 📝 Project Overview
 Digital Library Management System is a streamlined administrative dashboard and user interface designed to manage digital catalogs efficiently. The system provides an intuitive experience for browsing books by category, tracking loan requests, and managing user interactions through a robust rating and review system.
 
@@ -32,13 +53,14 @@ Digital Library Management System is a streamlined administrative dashboard and 
 ## ⚙️ Technical Requirements
 To run this project locally, ensure you have the following components installed:
 
-| Component | Minimum Version |
-| :--- | :--- |
-| **PHP** | `≥ 8.2` |
-| **Composer** | `Latest` |
-| **Laravel Framework** | `12.x` |
-| **MySQL / MariaDB** | `Latest` |
-| **Node.js & NPM** | `Latest (v18+)` |
+| Component   | Version           |
+|------------|-------------------|
+| PHP        | ≥ 8.2             |
+| Composer   | Latest            |
+| Laravel    | 12.x              |
+| Database   | MySQL / SQLite    |
+| Node.js    | Latest (v18+)     |
+
 
 ---
 ## ⌨️ Getting Started & Installation
@@ -46,31 +68,89 @@ Follow these steps to set up the environment and launch the library system on yo
 
 ### 1️⃣ Prepare the Source
 First, clone the project and enter the directory:
+
+
 ```bash
-git clone [ضع_رابط_مستودعك_هنا]
+git clone [https://github.com/RanadYousef/back_X5.git]
 cd back_X5
-2️⃣ Dependency Management
+```
+## 2️⃣ Dependency Management
 Install all required PHP and JavaScript packages:
+
+```bash
 composer install   # Installing backend packages
 npm install        # Installing frontend assets
-3️⃣ Environment Setup
+```
+
+### 3️⃣ Environment Setup
 Create your configuration file and generate a secure application key:
+
+```bash
 cp .env.example .env
 php artisan key:generate
-Note: Don't forget to configure your Database and Mailtrap credentials in the .env file.
-4️⃣ Database Initialization
-Build the library structure and populate it with initial data (Categories, Books, etc.):
-php artisan migrate --seed
-5️⃣ Launch the Platform
-Start the development server and compile the assets:
-# In your first terminal
-php artisan serve 
-# In your second terminal
-npm run dev
+```
+---
+
+## 📧 Email Configuration (.env)
+To enable email services (e.g., for support or notifications), configure your SMTP settings as follows:
+
+| Key | Description | Example Value |
+| :--- | :--- | :--- |
+| `MAIL_MAILER` | Mail transfer protocol | `smtp` |
+| `MAIL_HOST` | Outgoing mail server | `smtp.gmail.com` |
+| `MAIL_PORT` | SMTP port | `587` |
+| `MAIL_USERNAME` | Sender email address | `your-email@gmail.com` |
+| `MAIL_PASSWORD` | Google App Password | `your-app-password` |
+| `MAIL_FROM_ADDRESS` | Official sender email | `support@library.com` |
+| `MAIL_SUPPORT_ADDRESS` | Technical support email | `help@library.com` |
+
+> **💡 Security Tip:** For Gmail, you must enable **2-Step Verification** and generate an **App Password** from your Google Account security settings.
 
 ---
 
-## 👥 System Roles & Functionalities
+## 💬 Internal Chat System
+The system includes a real-time messaging feature between Managers and Employees.
+
+### 🗄️ Database Schema
+| Table | Description | Key Fields |
+| :--- | :--- | :--- |
+| **Conversations** | Tracks chats between two users | `manager_id`, `employee_id`, `updated_at` |
+| **Messages** | Stores individual messages | `conversation_id`, `sender_id`, `message`, `is_read` |
+
+
+
+### 🏗️ Logic & Models
+* **Models:** * `Conversation`: Manages user connections and message history.
+    * `Message`: Handles individual message data and read status.
+* **Relationships:** `Conversation` **hasMany** `Messages` | `Message` **belongsTo** `Conversation`.
+* **Controller (`ChatController`):** * List all user conversations.
+    * Initialize new chats.
+    * Fetch message history.
+    * Send/Save new messages and delete conversations.
+
+---
+
+### 4️⃣ Database Initialization
+Build the library structure and populate it with initial data (Categories, Books, etc.):
+
+```bash
+php artisan migrate --seed
+```
+
+### 5️⃣ Launch the Platform
+Start the development server and compile the assets:
+**In your first terminal:**
+```bash
+php artisan serve
+```
+**In your second terminal:**
+```bash
+npm run dev
+```
+
+---
+
+## 👥 System Roles
 
 ### 👑 System Administrator (Admin)
 * **Authentication:** Secure login to the administrative panel.
@@ -92,18 +172,20 @@ npm run dev
 * **Engagement:** Rating books and submitting written reviews.
 
 ---
----
+
 
 ## 🗄️ Database Structure
 The system follows a highly structured relational database schema to ensure data integrity and smooth library operations:
 
 ### 📁 Categories Table
 Defines the genres or sections of the library.
+
 * `id`: Primary key.
 * `name`: The name of the category (e.g., Science, Novels).
 
 ### 📚 Books Table
 Contains detailed information about each digital resource.
+
 * `id`: Primary key.
 * `category_id`: Foreign key linked to Categories.
 * `title` / `author`: Basic book details.
@@ -114,6 +196,7 @@ Contains detailed information about each digital resource.
 
 ### 🔄 Borrowings Table
 Tracks the lifecycle of a book loan.
+
 * `id`: Primary key.
 * `user_id` / `book_id`: Foreign keys linking users and books.
 * `borrowed_at`: Timestamp when the loan started.
@@ -122,30 +205,34 @@ Tracks the lifecycle of a book loan.
 
 ### ⭐ Reviews Table
 Manages user feedback and quality control.
+
 * `id`: Primary key.
 * `user_id` / `book_id`: Foreign keys.
-* `rating`: Numerical score (1 to 5).
+* `rating`: Numerical score (`1` `to` `5`).
 * `comment`: Optional text feedback.
 * `status`: Moderation status of the review.
 
----
 ---
 
 ## 🔗 System Interfaces & Routes
 The management system is divided into two main dashboards to ensure a structured workflow:
 
-### 👑 Administrator Interface
+###  👑 Administrator Interface
+
 | Feature | URL Route | Description |
 | :--- | :--- | :--- |
 | **Admin Dashboard** | `/admin` | Overview of system-wide statistics and reports. |
 | **Employee Management** | `/admin/employees` | Control center for managing employee accounts. |
 
+
 ### 👨‍💼 Employee Interface
+
 | Feature | URL Route | Description |
 | :--- | :--- | :--- |
 | **Main Workspace** | `/employee/dashboard` | Quick access to daily library tasks. |
 | **Inventory Control** | `/employee/books` | Full management of the book catalog. |
 | **Loan Processing** | `/employee/borrowings` | Reviewing and approving borrowing requests. |
+
 
 ---
 # 📡 API Documentation (Postman Guide)
@@ -157,11 +244,13 @@ This section details the available API endpoints and how to interact with them u
 ## 🔐 1. Authentication Module
 *All auth routes return a Bearer Token upon successful login/register.*
 
+
 | Method | Endpoint | Postman Body (JSON) | Description |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/register` | `name`, `email`, `password` | Create a new account |
 | `POST` | `/api/login` | `email`, `password` | Get Access Token |
 | `POST` | `/api/logout` | *(Requires Token)* | Revoke current session |
+
 
 ---
 
@@ -170,31 +259,38 @@ This section details the available API endpoints and how to interact with them u
 ## 🚀 Postman API Guide (Borrowing System)
 You can test the library core functionality using these endpoints. Make sure to include the `Bearer Token` in the header for protected routes.
 
+
 ### 📚 Book Catalog
+
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/books` | Retrieve all books with their details and categories. |
 
+
 ### 🔄 Borrowing Operations
+
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `POST` | `/api/borrowings/request-borrow` | Submit a new request to borrow a specific book. |
 | `POST` | `/api/borrowings/request-return/{id}` | Notify the library that you are returning a book. |
 
+
 ### 📊 User Activity & History
+
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/borrowings/current` | View your currently active loans (books you haven't returned yet). |
+| `GET` | `/api/borrowings/current` | View your currently active loans. |
 | `GET` | `/api/borrowings/history` | View a full history of all your past and returned books. |
 
----
 
+---
 
 ## 📄 Sample Responses
 
 ### 📚 Book Details Response:
 
 ```json
+
 {
     "status": "success",
     "message": "Books retrieved successfully",
@@ -217,7 +313,11 @@ You can test the library core functionality using these endpoints. Make sure to 
         }
     ]
 }
+```
+
+
 ### 📚 Borrow Response:
+```json
 {
     "status": "success",
     "message": "Borrow request submitted successfully",
@@ -231,14 +331,17 @@ You can test the library core functionality using these endpoints. Make sure to 
         "updated_at": "2026-01-17T18:18:21.000000Z"
     }
 }
+```
 
 ## 🔑 Sample Credentials
 You can use these accounts to explore the different dashboards and functionalities:
 
+
 | Role | Email | Password |
 | :--- | :--- | :--- |
-| **👑 Admin** | `admin@example.com` | `password123` |
-| **👨‍💼 Employee** | `employee@library.com` | `12345678` |
+| **👑 Admin** | `admin@library.com` | `password123` |
+| **👨‍💼 Employee** | `employee@library.com` | `password123` |
+
 
 ---
 
