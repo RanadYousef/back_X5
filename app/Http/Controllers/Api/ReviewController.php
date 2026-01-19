@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
+
 class ReviewController extends BaseApiController
 {
     /**
@@ -55,6 +56,7 @@ class ReviewController extends BaseApiController
                 'rating' => $validated['rating'],
                 'status' => 'pending',
                 'comment' => $validated['comment'],
+                'book_id' => $validated['book_id'],
             ]);
 
             DB::commit();

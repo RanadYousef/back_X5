@@ -10,7 +10,10 @@ use App\Http\Controllers\Api\BorrowingRequestController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\SupportController;
+use App\Http\Controllers\Api\LibraryLocationController;
 
+Route::get('/library/location', [LibraryLocationController::class, 'show']);
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -40,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
 //BOOKS API ROUTES
 Route::get('/books', [BookController::class, 'index']);
 Route::get('/books/{book}', [BookController::class, 'show'])->withTrashed();
+Route::get('/books/{id}', [BookController::class, 'show']);
 Route::get('/suggestions/most-borrowed', [BookController::class, 'mostBorrowed']);
 Route::get('/suggestions/top-rated', [BookController::class, 'topRated']);
 
@@ -47,4 +51,6 @@ Route::get('/suggestions/top-rated', [BookController::class, 'topRated']);
 // categories routes
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}/books', [CategoryController::class, 'books']);
-Route::post('/categories/search', [CategoryController::class, 'search']);
+Route::get('/categories/search', [CategoryController::class, 'search']);
+// email support route
+Route::post('/support/send', [SupportController::class, 'send']);

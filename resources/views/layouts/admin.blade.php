@@ -84,18 +84,38 @@
 
     <div class="ms-auto d-flex gap-3">
  
-        
-         <a href="{{ route('reviews.index') }}" class="btn btn-outline-warning btn-sm">reviews </a>
+        <!-- Chat Button -->
+        <a href="{{ route('chat.index') }}" class="btn btn-outline-info btn-sm position-relative">
+            <i class="bi bi-chat-dots-fill"></i> Chat
+            @php
+                try {
+                    $unreadCount = auth()->user()->notifications()
+                        ->where('type', 'App\Notifications\NewChatMessage')
+                        ->unread()
+                        ->count();
+                } catch (\Exception $e) {
+                    $unreadCount = 0;
+                }
+            @endphp
+            @if($unreadCount > 0)
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ $unreadCount }}
+                </span>
+            @endif
+        </a>
+        <a href="{{ route('reviews.index') }}" class="btn btn-outline-warning btn-sm">reviews </a>
         <a href="{{ route('books.index') }}" class="btn btn-outline-warning btn-sm">Books</a>
         <a href="{{ route('borrowings.index') }}" class="btn btn-outline-warning btn-sm">Borrowings</a>
         <a href="{{ route('categories.index') }}" class="btn btn-outline-warning btn-sm">Categories</a>
+        
+        
         @role('admin')
         <a href="{{ route('roles.index') }}" class="btn btn-outline-warning btn-sm">Roles</a>
         @endrole
         @role('admin')
-    <a href="{{ route('reports.index') }}" class="btn btn-outline-warning btn-sm">Reports</a>
-@endrole         
-@role('admin')
+        <a href="{{ route('reports.index') }}" class="btn btn-outline-warning btn-sm">Reports</a>
+        @endrole         
+        @role('admin')
         <a href="{{ route('users.index') }}" class="btn btn-outline-warning btn-sm">
          <i class="bi bi-people-fill"></i> Users
         </a>

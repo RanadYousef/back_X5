@@ -29,7 +29,8 @@ class BookResource extends JsonResource
 
             // These come from withCount() and withAvg()
             'borrows_count'  => $this->borrows_count ?? 0,
-            'average_rating' => round($this->reviews_avg_rating ?? 0, 1),
+            'average_rating' => round($this->average_rating ?? 0, 1),
+            'ratings_count'  => $this->ratings_count ?? 0,
         ];
     }
 }
