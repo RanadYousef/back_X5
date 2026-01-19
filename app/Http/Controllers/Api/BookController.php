@@ -8,10 +8,35 @@ use App\Http\Resources\BookResource;
 use App\Models\Book;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Class BookController
+ *
+ * Handles all public API operations related to books.
+ * Provides endpoints for listing books with filters,
+ * viewing single book details, and retrieving book suggestions
+ * such as most borrowed and top rated books.
+ */
 class BookController extends BaseApiController
 {
     /**
-     * Display a paginated list of books with filters & sorting.
+     * Retrieve a paginated list of books with filtering and sorting.
+     *
+     * Supports filtering by:
+     * - title (search)
+     * - category
+     * - language
+     * - publish year
+     *
+     * Supports sorting by:
+     * - average rating
+     * - publish year
+     * - title
+     *
+     * Only approved reviews are used to calculate average rating
+     * and ratings count.
+     *
+     * @param BookFilterRequest $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index(BookFilterRequest $request)
     {
@@ -23,6 +48,14 @@ class BookController extends BaseApiController
                 ->withCount('borrows');
 
             $query
+                ->withAvg(['reviews as average_rating' => function ($q) {
+                    $q->where('status', 'approved');
+                }], 'rating');
+
+            $query
+                ->withCount(['reviews as ratings_count' => function ($q) {
+                    $q->where('status', 'approved');
+                }]);
                 ->withAvg([
                     'reviews as average_rating' => function ($q) {
                         $q->where('status', 'approved');
@@ -56,9 +89,9 @@ class BookController extends BaseApiController
                 ->when($filters['sort'] ?? null, function ($q, $sort) {
                     match ($sort) {
                         'rating' => $q->orderBy('average_rating', 'DESC'),
-                        'year' => $q->orderBy('publish_year', 'DESC'),
-                        'title' => $q->orderBy('title', 'ASC'),
-                        default => null,
+                        'year'   => $q->orderBy('publish_year', 'DESC'),
+                        'title'  => $q->orderBy('title', 'ASC'),
+                        default  => null,
                     };
                 });
 
@@ -72,7 +105,6 @@ class BookController extends BaseApiController
                 BookResource::collection($books),
                 $message
             );
-
         } catch (\Exception $e) {
 
             Log::error('API Books Index Error: ' . $e->getMessage());
@@ -85,7 +117,12 @@ class BookController extends BaseApiController
     }
 
     /**
-     * Display a single book details.
+     * Retrieve details of a single book by its ID.
+     *
+     * Loads the book category and borrow count.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
@@ -108,7 +145,6 @@ class BookController extends BaseApiController
                 ],
                 'Book details loaded successfully'
             );
-
         } catch (\Exception $e) {
 
             Log::error("API Book Show Error for ID $id: " . $e->getMessage());
@@ -122,7 +158,12 @@ class BookController extends BaseApiController
 
 
     /**
-     * Get most borrowed books (top suggestions).
+     * Retrieve the most borrowed books.
+     *
+     * Returns a list of books ordered by borrow count
+     * in descending order.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function mostBorrowed()
     {
@@ -137,7 +178,6 @@ class BookController extends BaseApiController
                 BookResource::collection($books),
                 'Top borrowed books retrieved'
             );
-
         } catch (\Exception $e) {
 
             Log::error("API Most Borrowed Error: " . $e->getMessage());
@@ -150,13 +190,27 @@ class BookController extends BaseApiController
     }
 
     /**
-     * Get top-rated books based on average review stars.
+     * Retrieve top rated books based on approved reviews.
+     *
+     * Calculates average rating and ratings count
+     * using only approved reviews.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function topRated()
     {
         try {
             $books = Book::with('category')
                 ->withAvg(
+                    ['reviews as average_rating' => function ($q) {
+                        $q->where('status', 'approved');
+                    }],
+                    'rating'
+                )
+
+                ->withCount(['reviews as ratings_count' => function ($q) {
+                    $q->where('status', 'approved');
+                }])
                     [
                         'reviews as average_rating' => function ($q) {
                             $q->where('status', 'approved');
@@ -178,7 +232,6 @@ class BookController extends BaseApiController
                 BookResource::collection($books),
                 'Top rated books retrieved'
             );
-
         } catch (\Exception $e) {
 
             Log::error("API Top Rated Error: " . $e->getMessage());

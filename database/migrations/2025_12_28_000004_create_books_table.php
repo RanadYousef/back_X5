@@ -4,10 +4,28 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Class CreateBooksTable
+ *
+ * Migration responsible for creating the "books" table.
+ *
+ * This table stores all book-related information such as:
+ * - Title, author, and description
+ * - Publishing year and language
+ * - Number of available copies
+ * - Cover image path
+ *
+ * The table also supports soft deletes.
+ */
 return new class extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * Creates the "books" table with all required columns
+     * and establishes the relationship with the categories table.
+     *
+     * @return void
      */
     public function up(): void
     {
@@ -20,7 +38,7 @@ return new class extends Migration
             $table->year('publish_year');
             $table->string('cover_image')->nullable();
             $table->string('language');
-            $table->unsignedInteger('copies_number');                        
+            $table->unsignedInteger('copies_number');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -28,6 +46,10 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
+     *
+     * Drops the "books" table from the database.
+     *
+     * @return void
      */
     public function down(): void
     {

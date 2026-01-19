@@ -4,10 +4,21 @@ namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Class ReturnBookRequest
+ *
+ * Handles validation for returning a borrowed book
+ * via the API endpoints.
+ */
 class ReturnBookRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Determine whether the user is authorized
+     * to perform this request.
+     *
+     * Authorization is handled via middleware.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -15,9 +26,11 @@ class ReturnBookRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Get the validation rules for returning a book.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * Ensures that the provided borrowing ID exists.
+     *
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
