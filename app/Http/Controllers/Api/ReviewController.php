@@ -41,14 +41,18 @@ class ReviewController extends BaseApiController
      * @param StoreReviewRequest $request
      * @return void
      */
-    public function store(StoreReviewRequest $request)
+    public function store(StoreReviewRequest $request, $id)
     {
         $validated = $request->validated();
         DB::beginTransaction();
         try {
-
+           $book = Book::find($id);
+           if (!$book) {
+            return $this->error('not found',404);
+           }
             $review = Review::create([
                 'user_id' => auth()->id(),
+                'book_id' => $id,
                 'rating' => $validated['rating'],
                 'status' => 'pending',
                 'comment' => $validated['comment'],
@@ -71,9 +75,13 @@ class ReviewController extends BaseApiController
      * @param [type] $id
      * @return void
      */
-    public function destroy(Review $review)
+    public function destroy($id)
     {
         try {
+            $review = Review::withTrashed()->find($id);
+            if (!$review){
+                return $this->error('التقييم غير موجود',404);
+            }
             if ($review->user_id !== auth()->id()) {
                 return $this->error('Unauthorized to delete this review', 403);
             }

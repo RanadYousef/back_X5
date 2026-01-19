@@ -24,7 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
     ];
-
+protected $appends = ['badges'];
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -59,6 +59,22 @@ public function borrowingRequests()
 {
     return $this->hasMany(BorrowingRequest::class);
 }
-
+public function getBadgesAttribute()
+{
+    $badges = [];
+    if ($this->borrows_count > 10)
+    {
+        $badges[]='القارئ النهم';
+    }
+    if($this->reviews_count>5)
+    {
+        $badges[]='الناقد';
+    }
+    if($this->reviews_avg_rating>=4.5)
+    {
+        $badges[]='المميز';
+    }
+    return $badges;
+}
 
 }
