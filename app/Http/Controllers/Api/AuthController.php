@@ -41,7 +41,7 @@ class AuthController extends BaseApiController
             return $this->error('Invalid credentials', 401);
         }
 
-        $user = Auth::user();
+        $user = User::withCount(['borrows','reviews'])->find(Auth::id());
         $token = $user->createToken('api-token')->plainTextToken;
 
         return $this->success([

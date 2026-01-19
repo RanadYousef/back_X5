@@ -56,6 +56,18 @@ class BookController extends BaseApiController
                 ->withCount(['reviews as ratings_count' => function ($q) {
                     $q->where('status', 'approved');
                 }]);
+                ->withAvg([
+                    'reviews as average_rating' => function ($q) {
+                        $q->where('status', 'approved');
+                    }
+                ], 'rating');
+
+            $query
+                ->withCount([
+                    'reviews as ratings_count' => function ($q) {
+                        $q->where('status', 'approved');
+                    }
+                ]);
 
             $query
                 ->when($filters['search'] ?? null, function ($q, $search) {
@@ -116,12 +128,21 @@ class BookController extends BaseApiController
     {
         try {
             $book = Book::with('category')
-
                 ->withCount('borrows')
                 ->findOrFail($id);
+            $book->loadAvg('reviews', 'rating');
+            $suggestions = Book::where('category_id', $book->category_id)
+                ->where('id', '!=', $book->id)
+                ->withAvg('reviews', 'rating')
+                ->orderByDesc('reviews_avg_rating')
+                ->take(4)
+                ->get();
 
             return $this->success(
-                new BookResource($book),
+                [
+                    'book' => new BookResource($book),
+                    'suggestions' => BookResource::collection($suggestions),
+                ],
                 'Book details loaded successfully'
             );
         } catch (\Exception $e) {
@@ -134,6 +155,7 @@ class BookController extends BaseApiController
             );
         }
     }
+
 
     /**
      * Retrieve the most borrowed books.
@@ -189,6 +211,19 @@ class BookController extends BaseApiController
                 ->withCount(['reviews as ratings_count' => function ($q) {
                     $q->where('status', 'approved');
                 }])
+                    [
+                        'reviews as average_rating' => function ($q) {
+                            $q->where('status', 'approved');
+                        }
+                    ],
+                    'rating'
+                )
+
+                ->withCount([
+                    'reviews as ratings_count' => function ($q) {
+                        $q->where('status', 'approved');
+                    }
+                ])
                 ->orderByDesc('average_rating')
                 ->take(10)
                 ->get();

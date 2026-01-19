@@ -3,7 +3,9 @@
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+/**
+ * Summary of RegisterRequest
+ */
 class RegisterRequest extends FormRequest
 {
     public function authorize(): bool

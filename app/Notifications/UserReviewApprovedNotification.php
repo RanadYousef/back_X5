@@ -11,17 +11,28 @@ class UserReviewApprovedNotification extends Notification
     use Queueable;
 
     private string $bookTitle;
-
+    /**
+     * Summary of __construct
+     * @param string $bookTitle
+     */
     public function __construct(string $bookTitle)
     {
         $this->bookTitle = $bookTitle;
     }
-
+    /**
+     * Summary of via
+     * @param mixed $notifiable
+     * @return string[]
+     */
     public function via($notifiable): array
     {
         return ['mail'];
     }
-
+    /**
+     * Summary of toMail
+     * @param mixed $notifiable
+     * @return MailMessage
+     */
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)

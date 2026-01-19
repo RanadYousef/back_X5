@@ -9,37 +9,23 @@ use App\Services\BorrowingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Notifications\LowStockNotification;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 /**
  * Class BorrowingController
- *
- * Handles staff/admin operations related to borrowing requests and history.
- *
- * Responsibilities:
- * - Viewing pending borrowing and return requests
- * - Approving or rejecting requests
- * - Viewing borrowing history
- *
- * This controller delegates business logic to BorrowingService.
+ * Handles the administrative actions for book borrowing and return requests.
  */
 class BorrowingController extends Controller
 {
     /**
-     * Borrowing service instance.
-     *
      * @var BorrowingService
      */
     protected $borrowingService;
+
     /**
      * BorrowingController constructor.
-     *
-     * Injects the BorrowingService which contains
-     * the core business logic for borrowing operations.
-     *
-     * @param BorrowingService $borrowingService
+     * * @param BorrowingService $borrowingService
      */
     public function __construct(BorrowingService $borrowingService)
     {
@@ -47,50 +33,40 @@ class BorrowingController extends Controller
     }
 
     /**
-     * Display the borrowing management dashboard.
-     *
-     * Shows all pending borrowing and return requests
-     * that require staff/admin action.
-     *
-     * @return \Illuminate\View\View
+     * Display borrowing management dashboard.
+     * * @return View
      */
-    public function index()
+    public function index(): View
     {
         // Only fetch requests that actually need staff action
         $pendingRequests = BorrowingRequest::with(['book', 'user'])
             ->where('status', 'pending')
             ->latest()
             ->get();
+
         return view('borrowings.index', compact('pendingRequests'));
     }
+
     /**
-     * Display borrowing history.
-     *
-     * Shows a list of all borrowing records,
-     * including returned and active borrowings.
-     *
-     * @return \Illuminate\View\View
-     */    public function history()
+     * Display a complete history of all borrowings.
+     * * @return View
+     */
+    public function history(): View
     {
         $borrowings = Borrowing::with(['book', 'user'])
             ->latest()
             ->get();
+
         return view('borrowings.history', compact('borrowings'));
     }
 
     /**
-     * Approve a borrowing or return request.
+     * Approve borrow or return request.
      *
-     * This method delegates the approval logic
-     * to the BorrowingService which:
-     * - Updates request status
-     * - Creates or updates borrowing records
-     * - Handles stock changes if needed
-     *
-     * @param BorrowingRequest $borrowRequest
-     * @return \Illuminate\Http\RedirectResponse
+     * @param BorrowingRequest $borrowRequest The request instance being approved.
+     * @return RedirectResponse
      */
-    public function approve(BorrowingRequest $borrowRequest)
+    public function approve(BorrowingRequest $borrowRequest): RedirectResponse
     {
         try {
             $this->borrowingService->approveRequest($borrowRequest);
@@ -103,15 +79,12 @@ class BorrowingController extends Controller
     }
 
     /**
-     * Reject a borrowing or return request.
+     * Reject a borrow or return request.
      *
-     * Marks the request as rejected without
-     * performing any borrowing-related actions.
-     *
-     * @param BorrowingRequest $borrowRequest
-     * @return \Illuminate\Http\RedirectResponse
+     * @param BorrowingRequest $borrowRequest The request instance being rejected.
+     * @return RedirectResponse
      */
-    public function reject(BorrowingRequest $borrowRequest)
+    public function reject(BorrowingRequest $borrowRequest): RedirectResponse
     {
         try {
             $this->borrowingService->rejectRequest($borrowRequest);
