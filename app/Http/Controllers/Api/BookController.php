@@ -48,14 +48,19 @@ class BookController extends BaseApiController
                 ->withCount('borrows');
 
             $query
-                ->withAvg(['reviews as average_rating' => function ($q) {
-                    $q->where('status', 'approved');
-                }], 'rating');
+                ->withAvg([
+                    'reviews as average_rating' => function ($q) {
+                        $q->where('status', 'approved');
+                    }
+                ], 'rating');
 
             $query
-                ->withCount(['reviews as ratings_count' => function ($q) {
-                    $q->where('status', 'approved');
-                }]);
+                ->withCount([
+                    'reviews as ratings_count' => function ($q) {
+                        $q->where('status', 'approved');
+                    }
+                ]);
+            $query
                 ->withAvg([
                     'reviews as average_rating' => function ($q) {
                         $q->where('status', 'approved');
@@ -89,9 +94,9 @@ class BookController extends BaseApiController
                 ->when($filters['sort'] ?? null, function ($q, $sort) {
                     match ($sort) {
                         'rating' => $q->orderBy('average_rating', 'DESC'),
-                        'year'   => $q->orderBy('publish_year', 'DESC'),
-                        'title'  => $q->orderBy('title', 'ASC'),
-                        default  => null,
+                        'year' => $q->orderBy('publish_year', 'DESC'),
+                        'title' => $q->orderBy('title', 'ASC'),
+                        default => null,
                     };
                 });
 
@@ -202,15 +207,6 @@ class BookController extends BaseApiController
         try {
             $books = Book::with('category')
                 ->withAvg(
-                    ['reviews as average_rating' => function ($q) {
-                        $q->where('status', 'approved');
-                    }],
-                    'rating'
-                )
-
-                ->withCount(['reviews as ratings_count' => function ($q) {
-                    $q->where('status', 'approved');
-                }])
                     [
                         'reviews as average_rating' => function ($q) {
                             $q->where('status', 'approved');
@@ -218,6 +214,13 @@ class BookController extends BaseApiController
                     ],
                     'rating'
                 )
+
+                ->withCount([
+                    'reviews as ratings_count' => function ($q) {
+                        $q->where('status', 'approved');
+                    }
+                ])
+
 
                 ->withCount([
                     'reviews as ratings_count' => function ($q) {

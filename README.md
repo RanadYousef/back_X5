@@ -242,7 +242,7 @@ This section details the available API endpoints and how to interact with them u
 ---
 You can explore and test the system APIs directly through the Postman collection.
 
-**[📥 Click here to access the Postman Collection](https://ranadyousef001-6454040.postman.co/workspace/Ranad-Youssef's-Workspace~7e777496-a507-40c2-823a-bb5ee77f56ba/collection/50337451-8523db1f-9cc0-4ce1-8474-55ce611d6d73?action=share&source=copy-link&creator=50337451)**
+**[📥 Click here to access the Postman Collection](https://ranadyousef001-6454040.postman.co/workspace/Ranad-Youssef's-Workspace~7e777496-a507-40c2-823a-bb5ee77f56ba/collection/51621394-93c15864-1d49-4c1f-aa83-4ea94bd9f655?action=share&source=copy-link&creator=50337451)**
 
 ## 🔐 1. Authentication Module
 *All auth routes return a Bearer Token upon successful login/register.*
