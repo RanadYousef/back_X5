@@ -4,7 +4,7 @@
 
 <style>
 
-/* ===== Card نفس الداكن السابق ===== */
+
 .card-modern {
     background: #0f0f0f;
     border-radius: 14px;
@@ -12,7 +12,7 @@
     border: 1px solid rgba(255,234,0,0.12);
 }
 
-/* ===== Neon Buttons أصفر ===== */
+
 .btn-neon, .neon-btn {
     color: #ffea00;
     border: 1px solid #ffea00;
@@ -35,7 +35,6 @@
 
 .neon-active i { color: white !important; }
 
-/* ===== لمسة عصرية خفيفة فقط للجدول بدون تغيير لونه ===== */
 .table-dark {
     border-radius: 10px;
     overflow: hidden;
@@ -68,7 +67,6 @@
         </a>
     </div>
 
-    <!-- نفس جدول Bootstrap الأصلي -->
     <table class="table table-dark table-hover align-middle">
         <thead>
             <tr>
