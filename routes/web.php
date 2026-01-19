@@ -51,7 +51,6 @@ Route::middleware(['auth', 'role:admin|employee'])->group(function () {
     });
     Route::get('/borrowings', [BorrowingController::class, 'index'])->name('borrowings.index');
     Route::get('/borrowings/history', [BorrowingController::class, 'history'])->name('borrowings.history');
-    // عمليات الموافقة والرفض
 
     Route::post('/borrowings/approve/{borrowRequest}', [BorrowingController::class, 'approve'])->name('borrowings.approve');
     Route::post('/borrowings/reject/{borrowRequest}', [BorrowingController::class, 'reject'])->name('borrowings.reject');
