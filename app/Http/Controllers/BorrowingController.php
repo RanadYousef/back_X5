@@ -13,15 +13,46 @@ use App\Models\User;
 use App\Notifications\LowStockNotification;
 use Illuminate\Support\Facades\Notification;
 
+/**
+ * Class BorrowingController
+ *
+ * Handles staff/admin operations related to borrowing requests and history.
+ *
+ * Responsibilities:
+ * - Viewing pending borrowing and return requests
+ * - Approving or rejecting requests
+ * - Viewing borrowing history
+ *
+ * This controller delegates business logic to BorrowingService.
+ */
 class BorrowingController extends Controller
 {
+    /**
+     * Borrowing service instance.
+     *
+     * @var BorrowingService
+     */
     protected $borrowingService;
+    /**
+     * BorrowingController constructor.
+     *
+     * Injects the BorrowingService which contains
+     * the core business logic for borrowing operations.
+     *
+     * @param BorrowingService $borrowingService
+     */
     public function __construct(BorrowingService $borrowingService)
     {
         $this->borrowingService = $borrowingService;
     }
+
     /**
-     * Display borrowing management dashboard.
+     * Display the borrowing management dashboard.
+     *
+     * Shows all pending borrowing and return requests
+     * that require staff/admin action.
+     *
+     * @return \Illuminate\View\View
      */
     public function index()
     {
@@ -32,7 +63,14 @@ class BorrowingController extends Controller
             ->get();
         return view('borrowings.index', compact('pendingRequests'));
     }
-    public function history()
+    /**
+     * Display borrowing history.
+     *
+     * Shows a list of all borrowing records,
+     * including returned and active borrowings.
+     *
+     * @return \Illuminate\View\View
+     */    public function history()
     {
         $borrowings = Borrowing::with(['book', 'user'])
             ->latest()
@@ -41,7 +79,16 @@ class BorrowingController extends Controller
     }
 
     /**
-     * Approve borrow or return request.
+     * Approve a borrowing or return request.
+     *
+     * This method delegates the approval logic
+     * to the BorrowingService which:
+     * - Updates request status
+     * - Creates or updates borrowing records
+     * - Handles stock changes if needed
+     *
+     * @param BorrowingRequest $borrowRequest
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function approve(BorrowingRequest $borrowRequest)
     {
@@ -56,7 +103,13 @@ class BorrowingController extends Controller
     }
 
     /**
-     * Reject a borrow or return request.
+     * Reject a borrowing or return request.
+     *
+     * Marks the request as rejected without
+     * performing any borrowing-related actions.
+     *
+     * @param BorrowingRequest $borrowRequest
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function reject(BorrowingRequest $borrowRequest)
     {
@@ -68,6 +121,5 @@ class BorrowingController extends Controller
             Log::error('Borrowing rejection error: ' . $e->getMessage());
             return back()->with('error', 'An internal error occurred during rejection.');
         }
-
     }
 }

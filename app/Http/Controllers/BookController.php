@@ -12,25 +12,34 @@ use App\Models\Category;
 /**
  * Class BookController
  *
- * Handles CRUD operations for books.
+ * Handles CRUD operations for books in the admin panel,
+ * including listing, filtering, creating, updating,
+ * soft deleting, restoring, and permanently deleting books.
  */
 class BookController extends Controller
 {
     /**
-     * Display a listing of books.
+     * Display a paginated list of books with filters.
+     *
+     * Supports filtering by category and searching by
+     * title or author. Also loads average rating and
+     * ratings count for approved reviews.
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
      */
     public function index(Request $request)
     {
         $categories = Category::all();
 
         $query = Book::with('category')
-          ->withAvg(['reviews as average_rating' => function ($q) {
-             $q->where('status', 'approved');
+            ->withAvg(['reviews as average_rating' => function ($q) {
+                $q->where('status', 'approved');
             }], 'rating')
-          ->withCount(['reviews as ratings_count' => function ($q) {
-             $q->where('status', 'approved');
+            ->withCount(['reviews as ratings_count' => function ($q) {
+                $q->where('status', 'approved');
             }]);
-        
+
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
@@ -49,6 +58,8 @@ class BookController extends Controller
     }
     /**
      * Show the form for creating a new book.
+     *
+     * @return \Illuminate\View\View
      */
     public function create()
     {
@@ -58,7 +69,13 @@ class BookController extends Controller
     }
 
     /**
-     * Store a newly created book.
+     * Store a newly created book in storage.
+     *
+     * Handles validation, image upload, and
+     * saves the book record to the database.
+     *
+     * @param StoreBookRequest $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreBookRequest $request)
     {
@@ -74,7 +91,6 @@ class BookController extends Controller
 
             return redirect()->route('books.index')
                 ->with('success', 'Book created successfully.');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to create book.');
         }
@@ -82,6 +98,9 @@ class BookController extends Controller
 
     /**
      * Show the form for editing the specified book.
+     *
+     * @param Book $book
+     * @return \Illuminate\View\View
      */
     public function edit(Book $book)
     {
@@ -90,7 +109,14 @@ class BookController extends Controller
     }
 
     /**
-     * Update the specified book.
+     * Update the specified book in storage.
+     *
+     * Handles updating book data and replacing
+     * the cover image if a new one is uploaded.
+     *
+     * @param UpdateBookRequest $request
+     * @param Book $book
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateBookRequest $request, Book $book)
     {
@@ -113,14 +139,19 @@ class BookController extends Controller
 
             return redirect()->route('books.index')
                 ->with('success', 'Book updated successfully.');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Update failed.');
         }
     }
 
     /**
-     * Remove the specified book.
+     * Soft delete the specified book.
+     *
+     * Marks the book as deleted without
+     * removing it permanently from the database.
+     *
+     * @param Book $book
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Book $book)
     {
@@ -130,13 +161,14 @@ class BookController extends Controller
 
             return redirect()->route('books.index')
                 ->with('success', 'Book deleted successfully.');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Delete failed.');
         }
     }
     /**
-     * Display trashed books.
+     * Display a list of soft deleted books.
+     *
+     * @return \Illuminate\View\View
      */
     public function trashed()
     {
@@ -145,7 +177,10 @@ class BookController extends Controller
     }
 
     /**
-     * Restore a trashed book.
+     * Restore a soft deleted book.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function restore($id)
     {
@@ -157,7 +192,13 @@ class BookController extends Controller
     }
 
     /**
-     * Permanently delete a book.
+     * Permanently delete a book from storage.
+     *
+     * Also deletes the associated cover image
+     * from disk if it exists.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function forceDelete($id)
     {
